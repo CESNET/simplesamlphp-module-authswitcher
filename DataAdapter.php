@@ -60,4 +60,10 @@ public class DataAdapter {
 		);';
         $this->dbh->query($q);
     }
+    
+    public function getMethodsActiveForUidAndFactor($uid, $factor) {
+        $statement = $this->dbh->prepare('SELECT method, parameter FROM '. $this->table('SETTING') . ' WHERE uid = ? AND factor = ? ORDER BY priority ASC');
+        $statement->execute(array($uid, $factor));
+        return $statement->fetchAll();
+    }
 }
