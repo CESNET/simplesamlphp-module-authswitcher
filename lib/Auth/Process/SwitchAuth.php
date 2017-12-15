@@ -6,8 +6,6 @@ require_once '../../../DataAdapter.php';
 class aswAuthMethod {
     /** Module (folder) name, such as "authYubiKey" */
     private $moduleName;
-    /** Name of the field that the module's auth proc filter requires, such as "yubikey" */
-    private $targetFieldName;
     /** Array of integers limiting for which steps (2FA, 3FA, ...) this can be used */
     private $factors;
     
@@ -23,6 +21,53 @@ class aswAuthMethod {
         if (!is_array($factors) || $factors != array_filter($factors, 'is_int') || min($factors) < 1) {
             throw new Exception('Invalid factors passed: '.$factors);
         }
+    }
+}
+
+/** Concrete subclasses will be named aswAuthFilterMethod_modulename_filtername */
+abstract class aswAuthFilterMethod {
+    abstract public function process(&$request);
+    abstract public function __construct($methodParams);
+}
+
+/** Abstract class for authentication methods which only require a single secret string in an attribute. */
+abstract class aswAuthFilterMethodWichSimpleSecret extends aswAuthFilterMethod {
+    private $parameter;
+
+    public function __construct($methodParams) {
+        $this->parameter = $methodParams['parameter'];
+    }
+    
+    /** @override */
+    public function process(&$request) {
+        $request['Attributes'][getTargetFieldName()] = $this->parameter;
+    }
+    
+    abstract public function getTargetFieldName();
+}
+
+/** Definition for filter yubikey:OTP */
+class aswAuthFilterMethod_yubikey_OTP extends aswAuthFilterMethodWichSimpleSecret {
+    public function getTargetFieldName() {
+        return 'yubikey';
+    }
+}
+
+/** Definition for filter simpletotp:2fa */
+class aswAuthFilterMethod_simpletotp_2fa extends aswAuthFilterMethodWichSimpleSecret {
+    public function getTargetFieldName() {
+        return 'ga_secret';
+    }
+}
+
+/** Definition for filter authTiqr:Tiqr */
+class aswAuthFilterMethod_authTiqr_Tiqr extends aswAuthFilterMethod {
+    /** @override */
+    public function process(&$request) {
+    }
+    
+    /** @override */
+    public function __construct($methodParams) {
     }
 }
 

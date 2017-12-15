@@ -38,7 +38,6 @@ Add (for example) the following to `config/authsources.php` (into the `$config` 
             'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
         ),
         'simpletotp:2fa' => array(
-            'subject' => 'totpsecret', // change to the desired attribute name
         ),
     ),
 ),
