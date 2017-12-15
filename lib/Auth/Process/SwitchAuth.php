@@ -52,6 +52,8 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private $supportedFactorMin = 2;
     /** Maximal supported "n" in "n-th factor authentication" */
     private $supportedFactorMax = 2;
+    /** DataAdapter configuration */
+    private $dataAdapterConfig = array();
 
     /* preset attributes */
     private $methods = array(
@@ -66,7 +68,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** Lazy getter for DataAdapter */
     private function getData() {
         if ($this->dataAdapter == null) {
-            $this->dataAdapter = new DataAdapter();
+            $this->dataAdapter = new DataAdapter($this->dataAdapterConfig);
         }
         return $this->dataAdapter;
     }
@@ -86,6 +88,10 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         parent::__construct($config, $reserved);
 
         assert(class_exists('DataAdapter'));
+
+        if (is_array($config['dataAdapterConfig'])) {
+            $this->dataAdapterConfig = $config['dataAdapterConfig'];
+        }
         
         if (!is_array($config['configs'])) {
             throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');

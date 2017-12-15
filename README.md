@@ -27,6 +27,11 @@ Add (for example) the following to `config/authsources.php` (into the `$config` 
 ```php
 'authswitcherinstance' => array(
     'authswitcher:SwitchAuth',
+    'dataAdapterConfig' => array(
+        'db_dsn' => 'mysql:dbname=foobar;host=127.0.0.1', // change to match your database settings
+        'db_user' => 'foo', // change to database username
+        'db_pass' => 'bar', // change to database password
+    ),
     'configs' => array(
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
@@ -35,10 +40,6 @@ Add (for example) the following to `config/authsources.php` (into the `$config` 
         'simpletotp:2fa' => array(
             'subject' => 'totpsecret', // change to the desired attribute name
         ),
-    ),
-    'reserveds': array(
-        'yubikey:OTP' => array(),
-        'simpletotp:2fa' => array(),
     ),
 ),
 ```
