@@ -60,6 +60,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         new aswAuthMethod('simpletotp', 'ga_secret', array(AuthSwitcherFactor::SECOND)),
         new aswAuthMethod('authYubiKey', 'yubikey', array(AuthSwitcherFactor::SECOND)),
     );
+    /** DataAdapter for getting users' settings. */
     private $dataAdapter = null;
 
     /** Lazy getter for DataAdapter */
@@ -85,16 +86,16 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         parent::__construct($info, $config);
 
         assert(class_exists('DataAdapter'));
-
-        if (is_array($config['configs'])) {
-            /*$validModules = array_filter(array_map(array('Module','isModuleEnabled'), $config['modules']));
-            if ($vaildModules !== $config['modules']) {
-                $this->warning('Some modules in the configuration are missing or disabled. These modules were skipped.');
-            }*/
-            $this->configs = $config['configs'];
-        }
-        if (is_array($config['reserveds'])) {
-            $this->configs = $config['reserveds'];
+        
+        foreach(array('configs', 'reserveds') as $field) {
+            if (!is_array($config[$field])) {
+                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration field '.$field.' is missing.');
+            }
+            $filterModules = array_keys($config[$field]);
+            if (AuthSwitcherUtils::areFilterModulesEnabled($filterModules)) {
+                $this->warning('Some modules in the configuration are missing or disabled.');
+            }
+            $this->configs = $config[$field];
         }
         if (array_keys($this->configs) != array_keys($this->reserveds)) {
             $this->warning('Configs and reserveds do not have the same set of modules.');
@@ -134,18 +135,25 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private function chooseMethod($methods) {
         return $methods[0];
     }
-    
-
 }
 
 /** Methods not specific to this module. */
 class AuthSwitcherUtils {
     /** Execute an auth proc filter.
      * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php */
-    public static runAuthProcFilter($nestedClass, $config, $reserved) {
+    public static function runAuthProcFilter($nestedClass, $config, $reserved) {
         list($module, $simpleClass) = explode(":", $nestedClass);
         $className = 'sspmod_'.$module.'_Auth_Process_'.$simpleClass;
         $authFilter = new $className($config, $reserved);
         $authFilter->process($request);
+    }
+    
+    /** Check if all modules for the specified filters are installed and enabled. */
+    public static function areFilterModulesEnabled($filters) {
+        foreach ($filters as $filter) {
+            list($module) = explode(":", $filter);
+            if (!SimpleSAML_Module::isModuleEnabled($module)) return false;
+        }
+        return true;
     }
 }
