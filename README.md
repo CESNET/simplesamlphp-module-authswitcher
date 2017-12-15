@@ -1,12 +1,11 @@
 # SimpleSAMLPHP module authswitcher
 
-Module for switching between authentication methods on a per-user basis (e.g. [YubiKey](https://github.com/simplesamlphp/simplesamlphp-module-yubikey) or [TOTP](https://github.com/NIIF/simplesamlphp-module-authtfaga)).
-
-This module's main function is to run 2FA modules (probably as [Auth Proc Filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc)) depending on users' settings.
+Module for toggling [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) on a per-user basis (e.g. [YubiKey](https://github.com/simplesamlphp/simplesamlphp-module-yubikey) or [TOTP](https://github.com/aidan-/SimpleTOTP)).
 
 Example: One user only authenticates with username and password, second uses password and YubiKey and third user logs in with password and TOTP.
 
 It does not handle the settings, which can be done using the [authapi module](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authapi).
+This module retrieves the settings using class DataAdapter.
 
 ## How to
 
@@ -23,13 +22,28 @@ The module is enabled by default.
 
 ### Use (configure as auth resource)
 
-Add the following to `config/authsources.php` (into the `$config` array):
+Add (for example) the following to `config/authsources.php` (into the `$config` array):
 
 ```php
 'authswitcherinstance' => array(
     'authswitcher:SwitchAuth',
+    'configs' => array(
+        'yubikey:OTP' => array(
+            'api_client_id' => '12345', // change to your API client ID
+            'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
+        ),
+        'simpletotp:2fa' => array(
+            'subject' => 'totpsecret', // change to the desired attribute name
+        ),
+    ),
+    'reserveds': array(
+        'yubikey:OTP' => array(),
+        'simpletotp:2fa' => array(),
+    ),
 ),
 ```
+
+Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
 
 ### Use in an IdP
 
