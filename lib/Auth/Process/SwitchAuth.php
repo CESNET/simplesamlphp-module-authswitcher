@@ -19,29 +19,29 @@ class aswAuthMethod {
             throw new Exception('Invalid field name passed: '.$targetFieldName);
         $this->targetFieldName = $targetFieldName;
         
-        if (!is_array($factors) || $factors != array_filter($factors, 'is_int') || min($factors) < 1 || max($factors) > sspmod_authswitcher_Auth_Source_SwitchAuth::FACTOR_MAX) {
+        if (!is_array($factors) || $factors != array_filter($factors, 'is_int') || min($factors) < 1 || max($factors) > AuthSwitcher::FACTOR_MAX) {
             throw new Exception('Invalid factors passed: '.$factors);
         }
     }
 }
 
-class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_ProcessingFilter {
-    const DEBUG_CONSTANTS = array(0, E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE);
+class AuthSwitcher {
     const FACTOR_MAX = 2;
     const FACTOR_SECOND = 2;
+}
+
+class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_ProcessingFilter {
+    const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
 
     private $modules = array();
-    private $debug = E_USER_NOTICE;
 
     private $methods = array(
-        new aswAuthMethod('simpletotp', 'ga_secret', array(FACTOR_SECOND)),
-        new aswAuthMethod('authYubiKey', 'yubikey', array(FACTOR_SECOND)),
+        new aswAuthMethod('simpletotp', 'ga_secret', array(AuthSwitcher::FACTOR_SECOND)),
+        new aswAuthMethod('authYubiKey', 'yubikey', array(AuthSwitcher::FACTOR_SECOND)),
     );
     
-    private function debug($message) {
-        if ($debug > 0) {
-            trigger_error($message, $debug);
-        }
+    private function warning($message) {
+        SimpleSAML_Logger::warning(self::DEBUG_PREFIX . $message);
     }
     
     public function __construct($info, $config) {
@@ -52,13 +52,9 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         if (is_array($config['modules'])) {
             $validModules = array_filter(array_map(array('Module','isModuleEnabled'), $config['modules']));
             if ($vaildModules !== $config['modules']) {
-                $this->debug('Some modules in authswitcher configuration are missing or disabled. These modules were skipped.');
+                $this->warning('Some modules in the configuration are missing or disabled. These modules were skipped.');
             }
         $this->modules = $validModules;
         }
-
-        if (in_array($config['debug'], self::DEBUG_CONSTANTS)) {
-            $this->debug = $config['debug'];
-        }        
     }
 }
