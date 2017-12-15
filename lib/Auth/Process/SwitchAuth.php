@@ -48,8 +48,6 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /* configurable attributes */
     /** Associative array where keys are in form 'module:filter' and values are config arrays to be passed to those filters. */
     private $configs = array();
-    /** Similar to configs */
-    private $reserveds = array();
     /** Minimal supported "n" in "n-th factor authentication" */
     private $supportedFactorMin = 2;
     /** Maximal supported "n" in "n-th factor authentication" */
@@ -60,6 +58,8 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         new aswAuthMethod('simpletotp', 'ga_secret', array(AuthSwitcherFactor::SECOND)),
         new aswAuthMethod('authYubiKey', 'yubikey', array(AuthSwitcherFactor::SECOND)),
     );
+    /** Second constructor parameter */
+    private $reserved;
     /** DataAdapter for getting users' settings. */
     private $dataAdapter = null;
 
@@ -82,24 +82,21 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
 
     /** @override */
-    public function __construct($info, $config) {
-        parent::__construct($info, $config);
+    public function __construct($config, $reserved) {
+        parent::__construct($config, $reserved);
 
         assert(class_exists('DataAdapter'));
         
-        foreach(array('configs', 'reserveds') as $field) {
-            if (!is_array($config[$field])) {
-                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration field '.$field.' is missing.');
-            }
-            $filterModules = array_keys($config[$field]);
-            if (AuthSwitcherUtils::areFilterModulesEnabled($filterModules)) {
-                $this->warning('Some modules in the configuration are missing or disabled.');
-            }
-            $this->configs = $config[$field];
+        if (!is_array($config['configs'])) {
+            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
-        if (array_keys($this->configs) != array_keys($this->reserveds)) {
-            $this->warning('Configs and reserveds do not have the same set of modules.');
+        $filterModules = array_keys($config['configs']);
+        if (AuthSwitcherUtils::areFilterModulesEnabled($filterModules)) {
+            $this->warning('Some modules in the configuration are missing or disabled.');
         }
+        $this->configs = $config['configs'];
+        
+        $this->reserved = $reserved;
     }
     
     /** @override */
@@ -125,7 +122,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
                 throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration for '.$method.' is missing.');
             }
 
-            AuthSwitcherUtils::runAuthProcFilter($method, $this->configs[$method]);
+            AuthSwitcherUtils::runAuthProcFilter($method, $this->configs[$method], $reserved);
         }
     }
     
