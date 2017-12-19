@@ -1,6 +1,6 @@
 <?php
 /* TODO: remove this inclusion */
-require_once '../../../DataAdapter.php';
+require_once __DIR__ . '/../../../DataAdapter.php';
 
 /** Concrete subclasses will be named aswAuthFilterMethod_modulename_filtername */
 abstract class aswAuthFilterMethod {
@@ -13,7 +13,7 @@ abstract class aswAuthFilterMethodWichSimpleSecret extends aswAuthFilterMethod {
     private $parameter;
 
     public function __construct($methodParams) {
-        $this->parameter = $methodParams['parameter'];
+        $this->parameter = $methodParams->parameter;
     }
     
     /** @override */
@@ -135,14 +135,14 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /** @override */
     public function process(&$request) {
-        $uid = $request['Attributes'][AuthSwitcher::UID_ATTR];
+        $uid = $request['Attributes'][AuthSwitcher::UID_ATTR][0];
         for ($factor = $this->supportedFactorMin; $factor <= $this->supportedFactorMax; $factor++) {
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
             if (count($methods) == 0) {
                 $this->logNoMethodsForFactor($uid, $factor);
 
-                if (self::FINISH_WHEN_NO_METHODS) break;
+                if (self::FINISH_WHEN_NO_METHODS) return;
                 else continue;
             }
 
@@ -155,7 +155,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
 
             $this->prepareBeforeAuthProcFilter($method, $request);
 
-            AuthSwitcherUtils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $reserved);
+            AuthSwitcherUtils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $this->reserved);
         }
     }
     

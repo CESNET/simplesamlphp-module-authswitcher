@@ -1,12 +1,12 @@
 <?php
-public class DataAdapter {
-    const DB_FIELD_NAMES = array('db_dsn', 'db_user', 'db_pass');
+class DataAdapter {
+    const DB_FIELD_NAMES = array('dsn', 'user', 'pass');
     /*const DB_TABLE_FACTOR = "factor";*/
     const DB_TABLE_SETTING = "auth_method_setting";
 
-    private $db_dsn;
-    private $db_user;
-    private $db_pass;
+    private $dsn;
+    private $user;
+    private $pass;
     private $dbh;
     private $db_prefix = "miasw_";
 
@@ -15,10 +15,8 @@ public class DataAdapter {
     }
 
     private function dbConfig($config, $fieldName) {
-        $configName = str_replace('_', '.', $fieldName);
-        
-        if (is_string($config[$configName])) {
-            $this->$fieldName = $config[$configName];
+        if (isset($config[$fieldName]) && is_string($config[$fieldName])) {
+            $this->$fieldName = $config[$fieldName];
         }
     }
     
@@ -27,7 +25,7 @@ public class DataAdapter {
             $this->dbConfig($config, $fieldName);
         }
         try {
-            $this->dbh = new PDO($this->db_dsn, $this->db_user, $this->db_pass);
+            $this->dbh = new PDO($this->dsn, $this->user, $this->pass);
         } catch (PDOException $e) {
             echo 'Connection failed: '.$e->getMessage();
         }
@@ -55,10 +53,10 @@ public class DataAdapter {
 		method varchar(64) NOT NULL,
 		priority tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
 		factor tinyint(1) UNSIGNED NOT NULL,
-		parameter varchar(255) DEFAULT NULL,
+		parameter varchar(128) DEFAULT NULL,
 		PRIMARY KEY(uid, method, factor, parameter)
 		);';
-        $this->dbh->query($q);
+        $this->dbh->exec($q);
     }
     
     public function getMethodsActiveForUidAndFactor($uid, $factor) {

@@ -22,20 +22,21 @@ The module is enabled by default.
 
 ### Use (configure as auth resource)
 
-Add (for example) the following to `config/authsources.php` (into the `$config` array):
+Add (for example) the following as the first auth proc filter (e.g. into `config/authsources.php` in `authproc`):
 
 ```php
-'authswitcherinstance' => array(
-    'authswitcher:SwitchAuth',
+'1' => array(
+    'class' => 'authswitcher:SwitchAuth',
     'dataAdapterConfig' => array(
-        'db_dsn' => 'mysql:dbname=foobar;host=127.0.0.1', // change to match your database settings
-        'db_user' => 'foo', // change to database username
-        'db_pass' => 'bar', // change to database password
+        'dsn' => 'mysql:dbname=foobar;host=127.0.0.1', // change to match your database settings
+        'user' => 'foo', // change to database username
+        'pass' => 'bar', // change to database password
     ),
     'configs' => array(
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
             'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
+            'abort_if_missing' => true,
         ),
         'simpletotp:2fa' => array(
         ),
