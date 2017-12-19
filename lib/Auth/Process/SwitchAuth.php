@@ -9,8 +9,8 @@ abstract class aswAuthFilterMethod {
 }
 
 /** Abstract class for authentication methods which only require a single secret string in an attribute. */
-abstract class aswAuthFilterMethodWichSimpleSecret extends aswAuthFilterMethod {
-    private $parameter;
+abstract class aswAuthFilterMethodWithSimpleSecret extends aswAuthFilterMethod {
+    protected $parameter;
 
     public function __construct($methodParams) {
         $this->parameter = $methodParams->parameter;
@@ -24,15 +24,26 @@ abstract class aswAuthFilterMethodWichSimpleSecret extends aswAuthFilterMethod {
     abstract public function getTargetFieldName();
 }
 
-/** Definition for filter yubikey:OTP */
-class aswAuthFilterMethod_yubikey_OTP extends aswAuthFilterMethodWichSimpleSecret {
+/** Abstract class for authentication methods which only require an array of secret strings in an attribute. */
+abstract class aswAuthFilterMethodWithSimpleArraySecret extends aswAuthFilterMethodWithSimpleSecret {
+    public function __construct($methodParams) {
+        $this->parameter = explode(',', $methodParams->parameter);
+    }
+}
+
+
+
+/** Definition for filter yubikey:OTP
+ * @see https://github.com/simplesamlphp/simplesamlphp-module-yubikey */
+class aswAuthFilterMethod_yubikey_OTP extends aswAuthFilterMethodWithSimpleArraySecret {
     public function getTargetFieldName() {
         return 'yubikey';
     }
 }
 
-/** Definition for filter simpletotp:2fa */
-class aswAuthFilterMethod_simpletotp_2fa extends aswAuthFilterMethodWichSimpleSecret {
+/** Definition for filter simpletotp:2fa
+ * @see https://simplesamlphp.org/docs/stable/simplesamlphp-authproc */
+class aswAuthFilterMethod_simpletotp_2fa extends aswAuthFilterMethodWithSimpleSecret {
     public function getTargetFieldName() {
         return 'ga_secret';
     }
