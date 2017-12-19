@@ -2,28 +2,6 @@
 /* TODO: remove this inclusion */
 require_once '../../../DataAdapter.php';
 
-/** Authentication method (module with an auth proc filter) which can be used for n-th factor authentication. */
-class aswAuthMethod {
-    /** Module (folder) name, such as "authYubiKey" */
-    private $moduleName;
-    /** Array of integers limiting for which steps (2FA, 3FA, ...) this can be used */
-    private $factors;
-    
-    public function __construct($moduleName, $targetFieldName, $factors) {
-        if (!is_string($moduleName) || !Module::isModuleEnabled($moduleName))
-            throw new Exception('Invalid module name passed: '.$moduleName);
-        $this->moduleName = $moduleName;
-
-        if (!is_string($targetFieldName))
-            throw new Exception('Invalid field name passed: '.$targetFieldName);
-        $this->targetFieldName = $targetFieldName;
-        
-        if (!is_array($factors) || $factors != array_filter($factors, 'is_int') || min($factors) < 1) {
-            throw new Exception('Invalid factors passed: '.$factors);
-        }
-    }
-}
-
 /** Concrete subclasses will be named aswAuthFilterMethod_modulename_filtername */
 abstract class aswAuthFilterMethod {
     abstract public function process(&$request);
@@ -100,11 +78,6 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
 
-    /* preset attributes */
-    private $methods = array(
-        new aswAuthMethod('simpletotp', 'ga_secret', array(AuthSwitcherFactor::SECOND)),
-        new aswAuthMethod('authYubiKey', 'yubikey', array(AuthSwitcherFactor::SECOND)),
-    );
     /** Second constructor parameter */
     private $reserved;
     /** DataAdapter for getting users' settings. */
