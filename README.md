@@ -38,9 +38,12 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
             'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
+            'key_id_attribute' => 'yubikey',
             'abort_if_missing' => true,
         ),
         'simpletotp:2fa' => array(
+            'secret_attr' => 'totp_secret',
+            'enforce_2fa' => true,
         ),
     ),
 ),
@@ -53,13 +56,15 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 ),
 99 => array(
     'class' => 'core:AttributeAlter',
-    'subject' => 'ga_secret',
+    'subject' => 'totp_secret',
     'pattern' => '/.*/',
     '%remove',
 ),
 ```
 
-Currently the module contain's a `DataAdapter` which connects to an SQL database.
+All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
+
+Currently the module contains a `DataAdapter` which connects to an SQL database.
 
 Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
 
