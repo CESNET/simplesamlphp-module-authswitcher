@@ -18,7 +18,7 @@ abstract class aswAuthFilterMethodWichSimpleSecret extends aswAuthFilterMethod {
     
     /** @override */
     public function process(&$request) {
-        $request['Attributes'][getTargetFieldName()] = $this->parameter;
+        $request['Attributes'][$this->getTargetFieldName()] = $this->parameter;
     }
     
     abstract public function getTargetFieldName();
@@ -42,10 +42,12 @@ class aswAuthFilterMethod_simpletotp_2fa extends aswAuthFilterMethodWichSimpleSe
 class aswAuthFilterMethod_authTiqr_Tiqr extends aswAuthFilterMethod {
     /** @override */
     public function process(&$request) {
+        // TODO
     }
     
     /** @override */
     public function __construct($methodParams) {
+        // TODO
     }
 }
 
@@ -72,9 +74,9 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** Associative array where keys are in form 'module:filter' and values are config arrays to be passed to those filters. */
     private $configs = array();
     /** Minimal supported "n" in "n-th factor authentication" */
-    private $supportedFactorMin = 2;
+    private $supportedFactorMin = AuthSwitcherFactor::SECOND;
     /** Maximal supported "n" in "n-th factor authentication" */
-    private $supportedFactorMax = 2;
+    private $supportedFactorMax = AuthSwitcherFactor::SECOND;
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
 
@@ -122,6 +124,14 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         
         $this->reserved = $reserved;
     }
+
+    /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
+    private function prepareBeforeAuthProcFilter($method, &$request) {
+        list($module, $simpleClass) = explode(":", $method->method);
+        $filterMethodClassName = "aswAuthFilterMethod_" . $module . "_" . $simpleClass;
+        $filterMethod = new $filterMethodClassName($method);
+        $filterMethod->process($request);
+    }
     
     /** @override */
     public function process(&$request) {
@@ -130,23 +140,22 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
             if (count($methods) == 0) {
-                if ($factor == $this->supportedFactorMin) {
-                    $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
-                } else {
-                    $this->info('User '.$uid.' has no methods for factor '.$factor);
-                }
+                $this->logNoMethodsForFactor($uid, $factor);
 
                 if (self::FINISH_WHEN_NO_METHODS) break;
                 else continue;
             }
 
             $method = $this->chooseMethod($methods);
+            $methodClass = $method->method;
 
-            if (!isset($this->configs[$method])) {
-                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration for '.$method.' is missing.');
+            if (!isset($this->configs[$methodClass])) {
+                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration for ' . $methodClass . ' is missing.');
             }
 
-            AuthSwitcherUtils::runAuthProcFilter($method, $this->configs[$method], $reserved);
+            $this->prepareBeforeAuthProcFilter($method, $request);
+
+            AuthSwitcherUtils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $reserved);
         }
     }
     
@@ -156,13 +165,22 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private function chooseMethod($methods) {
         return $methods[0];
     }
+    
+    /** Log that a user has no methods for n-th factor. */
+    private function logNoMethodsForFactor($uid, $factor) {
+        if ($factor == $this->supportedFactorMin) {
+            $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
+        } else {
+            $this->info('User '.$uid.' has no methods for factor '.$factor);
+        }
+    }
 }
 
 /** Methods not specific to this module. */
 class AuthSwitcherUtils {
     /** Execute an auth proc filter.
      * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php */
-    public static function runAuthProcFilter($nestedClass, $config, $reserved) {
+    public static function runAuthProcFilter($nestedClass, $config, &$request, $reserved) {
         list($module, $simpleClass) = explode(":", $nestedClass);
         $className = 'sspmod_'.$module.'_Auth_Process_'.$simpleClass;
         $authFilter = new $className($config, $reserved);
