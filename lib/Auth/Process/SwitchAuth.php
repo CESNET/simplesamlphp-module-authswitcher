@@ -2,31 +2,9 @@
 /* TODO: remove this inclusion */
 require_once __DIR__ . '/../../../DataAdapter.php';
 
-/** Concrete subclasses will be named aswAuthFilterMethod_modulename_filtername */
-abstract class aswAuthFilterMethod {
-    abstract public function process(&$request);
-    abstract public function __construct($methodParams);
-}
-
-/** Abstract class for authentication methods which only require an array of secret string(s) in an attribute. */
-abstract class aswAuthFilterMethodWithSimpleSecret extends aswAuthFilterMethod {
-    protected $parameter;
-
-    public function __construct($methodParams) {
-        $this->parameter = explode(',', $methodParams->parameter);
-    }
-    
-    /** @override */
-    public function process(&$request) {
-        $request['Attributes'][$this->getTargetFieldName()] = $this->parameter;
-    }
-    
-    abstract public function getTargetFieldName();
-}
-
 /** Definition for filter yubikey:OTP
  * @see https://github.com/simplesamlphp/simplesamlphp-module-yubikey */
-class aswAuthFilterMethod_yubikey_OTP extends aswAuthFilterMethodWithSimpleSecret {
+class aswAuthFilterMethod_yubikey_OTP extends sspmod_authswitcher_AuthFilterMethodWithSimpleSecret {
     public function getTargetFieldName() {
         return 'yubikey';
     }
@@ -34,14 +12,14 @@ class aswAuthFilterMethod_yubikey_OTP extends aswAuthFilterMethodWithSimpleSecre
 
 /** Definition for filter simpletotp:2fa
  * @see https://github.com/aidan-/SimpleTOTP */
-class aswAuthFilterMethod_simpletotp_2fa extends aswAuthFilterMethodWithSimpleSecret {
+class aswAuthFilterMethod_simpletotp_2fa extends sspmod_authswitcher_AuthFilterMethodWithSimpleSecret {
     public function getTargetFieldName() {
         return 'totp_secret';
     }
 }
 
 /** Definition for filter authTiqr:Tiqr */
-class aswAuthFilterMethod_authTiqr_Tiqr extends aswAuthFilterMethod {
+class aswAuthFilterMethod_authTiqr_Tiqr extends sspmod_authswitcher_AuthFilterMethod {
     /** @override */
     public function process(&$request) {
         // TODO
@@ -51,19 +29,6 @@ class aswAuthFilterMethod_authTiqr_Tiqr extends aswAuthFilterMethod {
     public function __construct($methodParams) {
         // TODO
     }
-}
-
-/** Module-wide constants. */
-class AuthSwitcher {
-    /** Name of the uid attribute. */
-    const UID_ATTR = 'uid';
-}
-
-/** Enum expressing "n" in "n-th factor authentication" for added readability. */
-class AuthSwitcherFactor {
-    const FIRST = 1;
-    const SECOND = 2;
-    const THIRD = 3;
 }
 
 class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_ProcessingFilter {
@@ -76,9 +41,9 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** Associative array where keys are in form 'module:filter' and values are config arrays to be passed to those filters. */
     private $configs = array();
     /** Minimal supported "n" in "n-th factor authentication" */
-    private $supportedFactorMin = AuthSwitcherFactor::SECOND;
+    private $supportedFactorMin = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
     /** Maximal supported "n" in "n-th factor authentication" */
-    private $supportedFactorMax = AuthSwitcherFactor::SECOND;
+    private $supportedFactorMax = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
 
@@ -119,7 +84,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
             throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
         $filterModules = array_keys($config['configs']);
-        if (AuthSwitcherUtils::areFilterModulesEnabled($filterModules)) {
+        if (sspmod_authswitcher_Utils::areFilterModulesEnabled($filterModules)) {
             $this->warning('Some modules in the configuration are missing or disabled.');
         }
         $this->configs = $config['configs'];
@@ -137,7 +102,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /** @override */
     public function process(&$request) {
-        $uid = $request['Attributes'][AuthSwitcher::UID_ATTR][0];
+        $uid = $request['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
         for ($factor = $this->supportedFactorMin; $factor <= $this->supportedFactorMax; $factor++) {
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
@@ -157,7 +122,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
 
             $this->prepareBeforeAuthProcFilter($method, $request);
 
-            AuthSwitcherUtils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $this->reserved);
+            sspmod_authswitcher_Utils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $this->reserved);
         }
     }
     
@@ -178,23 +143,3 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
 }
 
-/** Methods not specific to this module. */
-class AuthSwitcherUtils {
-    /** Execute an auth proc filter.
-     * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php */
-    public static function runAuthProcFilter($nestedClass, $config, &$request, $reserved) {
-        list($module, $simpleClass) = explode(":", $nestedClass);
-        $className = 'sspmod_'.$module.'_Auth_Process_'.$simpleClass;
-        $authFilter = new $className($config, $reserved);
-        $authFilter->process($request);
-    }
-    
-    /** Check if all modules for the specified filters are installed and enabled. */
-    public static function areFilterModulesEnabled($filters) {
-        foreach ($filters as $filter) {
-            list($module) = explode(":", $filter);
-            if (!SimpleSAML_Module::isModuleEnabled($module)) return false;
-        }
-        return true;
-    }
-}
