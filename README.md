@@ -44,6 +44,19 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
         ),
     ),
 ),
+// and as a safety precausion, remove the "secret" attributes
+98 => array(
+    'class' => 'core:AttributeAlter',
+    'subject' => 'yubikey',
+    'pattern' => '/.*/',
+    '%remove',
+),
+99 => array(
+    'class' => 'core:AttributeAlter',
+    'subject' => 'ga_secret',
+    'pattern' => '/.*/',
+    '%remove',
+),
 ```
 
 Currently the module contain's a `DataAdapter` which connects to an SQL database.
