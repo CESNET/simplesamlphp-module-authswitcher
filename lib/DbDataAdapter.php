@@ -1,7 +1,6 @@
 <?php
 class sspmod_authswitcher_DbDataAdapter implements sspmod_authswitcher_DataAdapter {
     const DB_FIELD_NAMES = array('dsn', 'user', 'pass');
-    /*const DB_TABLE_FACTOR = "factor";*/
     const DB_TABLE_SETTING = "auth_method_setting";
 
     private $dsn;
@@ -10,17 +9,20 @@ class sspmod_authswitcher_DbDataAdapter implements sspmod_authswitcher_DataAdapt
     private $dbh;
     private $db_prefix = "miasw_";
 
-    private function table($name) {
+    /** Get prefixed table name. */
+    private function table(string $name) {
         return $this->db_prefix . constant('self::DB_TABLE_' . $name);
     }
 
-    private function dbConfig($config, $fieldName) {
+    /** Get a configuration parameter from the config array. */
+    private function dbConfig(array $config, string $fieldName) {
         if (isset($config[$fieldName]) && is_string($config[$fieldName])) {
             $this->$fieldName = $config[$fieldName];
         }
     }
     
-    public function __construct($config) {
+    /** @override */
+    public function __construct(array $config) {
         foreach (self::DB_FIELD_NAMES as $fieldName) {
             $this->dbConfig($config, $fieldName);
         }
@@ -32,22 +34,10 @@ class sspmod_authswitcher_DbDataAdapter implements sspmod_authswitcher_DataAdapt
         $this->createTables();
     }
     
-    /** https://yuml.me/edit/22d9ff74 */
-    /** https://yuml.me/edit/6c9f38e5 */
+    /* https://yuml.me/edit/22d9ff74 */
+    /* https://yuml.me/edit/6c9f38e5 */
+    /** Create DB tables. */
     private function createTables() {
-	/*$q = 'CREATE TABLE IF NOT EXISTS '. $this->table('FACTOR') . ' (
-		  factor tinyint(1) UNSIGNED NOT NULL,
-		  PRIMARY KEY(factor)
-		 );';
-        $this->dbh->query($q);
-
-	$q = 'INSERT IGNORE INTO ' . $this->table('FACTOR') . ' VALUES (1)';
-	for ($f = 1; $f <= self::FACTOR_MAX; $f++) {
-            $q .= '('.$f.')');
-        }
-	$this->dbh->query($q);
-	$this->dbh->query('DELETE FROM ' . $this->table('FACTOR') . ' WHERE factor < 1 OR factor > ' . self::FACTOR_MAX);*/
-
 	$q = 'CREATE TABLE IF NOT EXISTS '. $this->table('SETTING') . ' (
 		uid varchar(30) NOT NULL,
 		method varchar(64) NOT NULL,
@@ -59,9 +49,10 @@ class sspmod_authswitcher_DbDataAdapter implements sspmod_authswitcher_DataAdapt
         $this->dbh->exec($q);
     }
     
-    public function getMethodsActiveForUidAndFactor($uid, $factor) {
+    /** @override */
+    public function getMethodsActiveForUidAndFactor(string $uid, int $factor) {
         $statement = $this->dbh->prepare('SELECT method, parameter FROM '. $this->table('SETTING') . ' WHERE uid = ? AND factor = ? ORDER BY priority ASC');
         $statement->execute(array($uid, $factor));
-        return $statement->fetchAll(PDO::FETCH_OBJ);
+        return $statement->fetchAll(PDO::FETCH_CLASS, 'sspmod_authswitcher_MethodParams');
     }
 }

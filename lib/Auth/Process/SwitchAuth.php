@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . "/../../defaultAuthFilterMethods.php";
+require_once __DIR__ . '/../../defaultAuthFilterMethods.php';
 
 class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_ProcessingFilter {
     /* constants */
@@ -15,7 +15,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
     /** DataAdapter implementation class name */
-    private $dataAdapterClassName = "sspmod_authswitcher_DbDataAdapter";
+    private $dataAdapterClassName = 'sspmod_authswitcher_DbDataAdapter';
 
     /** Second constructor parameter */
     private $reserved;
@@ -33,11 +33,11 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /* logging */
     /** Log a warning. */
-    private function warning($message) {
+    private function warning(string $message) {
         SimpleSAML_Logger::warning(self::DEBUG_PREFIX . $message);
     }
     /** Log an info. */
-    private function info($message) {
+    private function info(string $message) {
         SimpleSAML_Logger::info(self::DEBUG_PREFIX . $message);
     }
 
@@ -52,7 +52,8 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         $this->reserved = $reserved;
     }
     
-    private function getConfig($config) {
+    /** Get configuration parameters from the config array. */
+    private function getConfig(array $config) {
         if (!is_array($config['configs'])) {
             throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
@@ -85,7 +86,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
 
     /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
-    private function prepareBeforeAuthProcFilter($method, &$request) {
+    private function prepareBeforeAuthProcFilter(sspmod_authswitcher_MethodParams $method, &$request) {
         list($module, $simpleClass) = explode(":", $method->method);
         $filterMethodClassName = "aswAuthFilterMethod_" . $module . "_" . $simpleClass;
         $filterMethod = new $filterMethodClassName($method);
@@ -121,12 +122,12 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** Choose an appropriate method from the set.
      * @todo filter methods based on device (availability)
      */
-    private function chooseMethod($methods) {
+    private function chooseMethod(array $methods) {
         return $methods[0];
     }
     
     /** Log that a user has no methods for n-th factor. */
-    private function logNoMethodsForFactor($uid, $factor) {
+    private function logNoMethodsForFactor(string $uid, int $factor) {
         if ($factor == sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
             $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
         } else {
