@@ -7,9 +7,7 @@ Example: One user only authenticates with username and password, second uses pas
 It does not handle the settings, which can be done using the [authapi module](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authapi).
 This module retrieves the settings using class DataAdapter.
 
-## How to
-
-### Install
+## Install
 
 Copy the contents of this repository (folder) into a folder named `authswitcher` in your SSP installation's `modules` folder.
 
@@ -22,7 +20,7 @@ The module is enabled by default.
 
 The modules that are going to be controlled by authswitcher need to be installed separately.
 
-### Use (configure as auth proc filter)
+## Use (configure as auth proc filter)
 
 Add (for example) the following as the first [auth proc filter](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc#section_1):
 
@@ -64,8 +62,30 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 
 All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
 
-Currently the module contains a `DataAdapter` which connects to an SQL database.
+By default the module uses a `DataAdapter` implementation which connects to an SQL database.
 
-Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
+Note: Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
+
+## Extend this module
+
+### Custom DataAdapter
+
+You can write our own implementation of the [sspmod_authswitcher_DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/DataAdapter.php) interface:
+
+```php
+class MyDataAdapter implements sspmod_authswitcher_DataAdapter {
+
+}
+```
+
+If you make this class available (loaded), you can then setup authswitcher to use it:
+```php
+'1' => array(
+    'class' => 'authswitcher:SwitchAuth',
+    /* ... */
+    'dataAdapterClassName' => 'MyDataAdapter',
+    /* ... */
+),
+```
 
 © 2017 CSIRT-MU
