@@ -70,7 +70,7 @@ Note: Do *NOT* add separate filters for the authentication methods that are cont
 
 ### Custom DataAdapter
 
-You can write our own implementation of the [sspmod_authswitcher_DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/DataAdapter.php) interface:
+You can write our own implementation of the [sspmod_authswitcher_DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/DataAdapter.php) interface:
 
 ```php
 class MyDataAdapter implements sspmod_authswitcher_DataAdapter {
