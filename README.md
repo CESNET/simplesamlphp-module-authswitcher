@@ -62,7 +62,8 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 
 All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
 
-By default the module uses a `DataAdapter` implementation which connects to an SQL database.
+By default the module uses a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
+Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa. To add more, you have to write [custom AuthFilterMethod](#custom-authfiltermethod)s.
 
 Note: Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
 
@@ -74,7 +75,7 @@ You can write our own implementation of the [sspmod_authswitcher_DataAdapter](ht
 
 ```php
 class MyDataAdapter implements sspmod_authswitcher_DataAdapter {
-
+    /* ... */
 }
 ```
 
@@ -87,5 +88,18 @@ If you make this class available (loaded), you can then setup authswitcher to us
     /* ... */
 ),
 ```
+
+### Custom AuthFilterMethod
+
+If you want to add a new MFA method, create a class whose name is in the form `aswAuthFilterMethod_*modulename*_*filtername*` and it extends [sspmod_authswitcher_AuthFilterMethod](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/AuthFilterMethod.php).
+For example for a filter named `bar` of a module named `foo`:
+```php
+class aswAuthFilterMethod_foo_bar extends sspmod_authswitcher_AuthFilterMethod {
+    /* ... */
+}
+```
+
+Then configure authswitcher to use filter `foo:bar` and this class will be used.
+
 
 © 2017 CSIRT-MU
