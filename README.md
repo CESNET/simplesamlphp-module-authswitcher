@@ -27,6 +27,7 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 ```php
 '1' => array(
     'class' => 'authswitcher:SwitchAuth',
+    'dataAdapterClassName' => 'sspmod_authapi_DbDataAdapter',
     'dataAdapterConfig' => array( // parameters passed to DataAdapter's constructor
         'dsn' => 'mysql:dbname=foobar;host=127.0.0.1', // change to match your database settings
         'user' => 'foo', // change to database username

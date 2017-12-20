@@ -15,7 +15,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
     /** DataAdapter implementation class name */
-    private $dataAdapterClassName = 'sspmod_authswitcher_DbDataAdapter';
+    private $dataAdapterClassName;
 
     /** Second constructor parameter */
     private $reserved;
@@ -74,15 +74,16 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
             $this->dataAdapterConfig = $config['dataAdapterConfig'];
         }
         
-        if (isset($config['dataAdapterClassName'])) {
-            if (!(
-               is_string($config['dataAdapterClassName']) &&
-               class_exists($config['dataAdapterClassName']) &&
-               in_array('sspmod_authswitcher_DataAdapter', class_implements($config['dataAdapterClassName']))
-            )) {
-                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Invalid dataAdapterClassName supplied.');
-            }
+        if (!is_string($config['dataAdapterClassName'])) {
+            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'dataAdapterClassName is missing.');
         }
+        if (!class_exists($config['dataAdapterClassName'])) {
+            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'dataAdapterClassName does not exist.');
+        }
+        if (!in_array('sspmod_authswitcher_DataAdapter', class_implements($config['dataAdapterClassName']))) {
+            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'dataAdapterClassName does not implement sspmod_authswitcher_DataAdapter');
+        }
+        $this->dataAdapterClassName = $config['dataAdapterClassName'];
     }
 
     /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
