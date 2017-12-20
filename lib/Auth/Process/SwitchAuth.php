@@ -1,7 +1,4 @@
 <?php
-/* TODO: remove this inclusion */
-require_once __DIR__ . '/../../../DataAdapter.php';
-
 /** Definition for filter yubikey:OTP
  * @see https://github.com/simplesamlphp/simplesamlphp-module-yubikey */
 class aswAuthFilterMethod_yubikey_OTP extends sspmod_authswitcher_AuthFilterMethodWithSimpleSecret {
@@ -40,12 +37,12 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /* configurable attributes */
     /** Associative array where keys are in form 'module:filter' and values are config arrays to be passed to those filters. */
     private $configs = array();
-    /** Minimal supported "n" in "n-th factor authentication" */
-    private $supportedFactorMin = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
     /** Maximal supported "n" in "n-th factor authentication" */
     private $supportedFactorMax = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
     /** DataAdapter configuration */
     private $dataAdapterConfig = array();
+    /** DataAdapter implementation class name */
+    private $dataAdapterClassName = "sspmod_authswitcher_DbDataAdapter";
 
     /** Second constructor parameter */
     private $reserved;
@@ -55,7 +52,8 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** Lazy getter for DataAdapter */
     private function getData() {
         if ($this->dataAdapter == null) {
-            $this->dataAdapter = new DataAdapter($this->dataAdapterConfig);
+            $className = $this->dataAdapterClassName;
+            $this->dataAdapter = new $className($this->dataAdapterConfig);
         }
         return $this->dataAdapter;
     }
@@ -74,12 +72,14 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     public function __construct($config, $reserved) {
         parent::__construct($config, $reserved);
 
-        assert(class_exists('DataAdapter'));
+        assert(interface_exists('sspmod_authswitcher_DataAdapter'));
 
-        if (is_array($config['dataAdapterConfig'])) {
-            $this->dataAdapterConfig = $config['dataAdapterConfig'];
-        }
-        
+        $this->getConfig($config);
+
+        $this->reserved = $reserved;
+    }
+    
+    private function getConfig($config) {
         if (!is_array($config['configs'])) {
             throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
@@ -89,7 +89,26 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
         }
         $this->configs = $config['configs'];
         
-        $this->reserved = $reserved;
+        if (isset($config['supportedFactorMax'])) {
+            if (!is_int($config['supportedFactorMax']) || $config['supportedFactorMax'] < sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
+               throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Invalid configuration parameter supportedFactorMax.');
+            }
+            $this->supportedFactorMax = $config['supportedFactorMax'];
+        }
+        
+        if (is_array($config['dataAdapterConfig'])) {
+            $this->dataAdapterConfig = $config['dataAdapterConfig'];
+        }
+        
+        if (isset($config['dataAdapterClassName'])) {
+            if (!(
+               is_string($config['dataAdapterClassName']) &&
+               class_exists($config['dataAdapterClassName']) &&
+               in_array('sspmod_authswitcher_DataAdapter', class_implements($config['dataAdapterClassName']))
+            )) {
+                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Invalid dataAdapterClassName supplied.');
+            }
+        }
     }
 
     /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
@@ -103,7 +122,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** @override */
     public function process(&$request) {
         $uid = $request['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
-        for ($factor = $this->supportedFactorMin; $factor <= $this->supportedFactorMax; $factor++) {
+        for ($factor = sspmod_authswitcher_AuthSwitcher::FACTOR_MIN; $factor <= $this->supportedFactorMax; $factor++) {
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
             if (count($methods) == 0) {
@@ -135,7 +154,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /** Log that a user has no methods for n-th factor. */
     private function logNoMethodsForFactor($uid, $factor) {
-        if ($factor == $this->supportedFactorMin) {
+        if ($factor == sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
             $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
         } else {
             $this->info('User '.$uid.' has no methods for factor '.$factor);
