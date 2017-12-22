@@ -28,11 +28,6 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 '1' => array(
     'class' => 'authswitcher:SwitchAuth',
     'dataAdapterClassName' => 'sspmod_authapi_DbDataAdapter',
-    'dataAdapterConfig' => array( // parameters passed to DataAdapter's constructor
-        'dsn' => 'mysql:dbname=foobar;host=127.0.0.1', // change to match your database settings
-        'user' => 'foo', // change to database username
-        'pass' => 'bar', // change to database password
-    ),
     'configs' => array(
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
@@ -63,7 +58,7 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 
 All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
 
-By default the module uses a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
+The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
 Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa. To add more, you have to write [custom AuthFilterMethod](#custom-authfiltermethod)s.
 
 Note: Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.

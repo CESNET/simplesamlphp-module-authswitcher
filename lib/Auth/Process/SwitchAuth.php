@@ -12,8 +12,6 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private $configs = array();
     /** Maximal supported "n" in "n-th factor authentication" */
     private $supportedFactorMax = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
-    /** DataAdapter configuration */
-    private $dataAdapterConfig = array();
     /** DataAdapter implementation class name */
     private $dataAdapterClassName;
 
@@ -26,7 +24,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private function getData() {
         if ($this->dataAdapter == null) {
             $className = $this->dataAdapterClassName;
-            $this->dataAdapter = new $className($this->dataAdapterConfig);
+            $this->dataAdapter = new $className();
         }
         return $this->dataAdapter;
     }
@@ -68,10 +66,6 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
                throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Invalid configuration parameter supportedFactorMax.');
             }
             $this->supportedFactorMax = $config['supportedFactorMax'];
-        }
-        
-        if (is_array($config['dataAdapterConfig'])) {
-            $this->dataAdapterConfig = $config['dataAdapterConfig'];
         }
         
         if (!is_string($config['dataAdapterClassName'])) {
