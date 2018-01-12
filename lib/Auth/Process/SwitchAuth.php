@@ -31,11 +31,11 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /* logging */
     /** Log a warning. */
-    private function warning(string $message) {
+    private function warning(/*string*/ $message) {
         SimpleSAML_Logger::warning(self::DEBUG_PREFIX . $message);
     }
     /** Log an info. */
-    private function info(string $message) {
+    private function info(/*string*/ $message) {
         SimpleSAML_Logger::info(self::DEBUG_PREFIX . $message);
     }
 
@@ -122,7 +122,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
     
     /** Log that a user has no methods for n-th factor. */
-    private function logNoMethodsForFactor(string $uid, int $factor) {
+    private function logNoMethodsForFactor(/*string*/ $uid, /*int*/ $factor) {
         if ($factor == sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
             $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
         } else {

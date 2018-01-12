@@ -3,7 +3,7 @@
 class sspmod_authswitcher_Utils {
     /** Execute an auth proc filter.
      * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php */
-    public static function runAuthProcFilter(string $nestedClass, array $config, &$request, $reserved) {
+    public static function runAuthProcFilter(/*string*/ $nestedClass, array $config, &$request, $reserved) {
         list($module, $simpleClass) = explode(":", $nestedClass);
         $className = 'sspmod_'.$module.'_Auth_Process_'.$simpleClass;
         $authFilter = new $className($config, $reserved);
