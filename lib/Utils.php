@@ -12,9 +12,15 @@ class sspmod_authswitcher_Utils {
     
     /** Check if all modules for the specified filters are installed and enabled. */
     public static function areFilterModulesEnabled(array $filters) {
+        $invalidModules = array();
         foreach ($filters as $filter) {
             list($module) = explode(":", $filter);
-            if (!SimpleSAML_Module::isModuleEnabled($module)) return false;
+            if (!SimpleSAML_Module::isModuleEnabled($module)) {
+                $invalidModules[] = $module;
+	    }
+        }
+        if ($invalidModules) {
+            return $invalidModules;
         }
         return true;
     }

@@ -56,8 +56,9 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
             throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
         $filterModules = array_keys($config['configs']);
-        if (sspmod_authswitcher_Utils::areFilterModulesEnabled($filterModules)) {
-            $this->warning('Some modules in the configuration are missing or disabled.');
+        $invalidModules = sspmod_authswitcher_Utils::areFilterModulesEnabled($filterModules);
+        if ($invalidModules !== true) {
+            $this->warning('Some modules ('. implode(',', $invalidModules) .') in the configuration are missing or disabled.');
         }
         $this->configs = $config['configs'];
         
