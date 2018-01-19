@@ -92,6 +92,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /** @override */
     public function process(&$request) {
         $uid = $request['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
+        $request['Attributes'][sspmod_authswitcher_AuthSwitcher::MFA_PERFORMED_ATTR] = array();
         for ($factor = sspmod_authswitcher_AuthSwitcher::FACTOR_MIN; $factor <= $this->supportedFactorMax; $factor++) {
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
@@ -111,6 +112,7 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
 
             $this->prepareBeforeAuthProcFilter($method, $request);
 
+            $request['Attributes'][sspmod_authswitcher_AuthSwitcher::MFA_PERFORMED_ATTR][] = $methodClass;
             sspmod_authswitcher_Utils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $this->reserved);
         }
     }
