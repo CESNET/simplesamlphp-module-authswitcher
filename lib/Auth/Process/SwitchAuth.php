@@ -82,17 +82,16 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
 
     /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
-    private function prepareBeforeAuthProcFilter(sspmod_authswitcher_MethodParams $method, &$request) {
+    private function prepareBeforeAuthProcFilter(sspmod_authswitcher_MethodParams $method, &$state) {
         list($module, $simpleClass) = explode(":", $method->method);
         $filterMethodClassName = "aswAuthFilterMethod_" . $module . "_" . $simpleClass;
         $filterMethod = new $filterMethodClassName($method);
-        $filterMethod->process($request);
+        $filterMethod->process($state);
     }
     
     /** @override */
-    public function process(&$request) {
-        $uid = $request['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
-        $request['Attributes'][sspmod_authswitcher_AuthSwitcher::MFA_PERFORMED_ATTR] = array();
+    public function process(&$state) {
+        $uid = $state['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
         for ($factor = sspmod_authswitcher_AuthSwitcher::FACTOR_MIN; $factor <= $this->supportedFactorMax; $factor++) {
             $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $factor);
 
@@ -110,10 +109,13 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
                 throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration for ' . $methodClass . ' is missing.');
             }
 
-            $this->prepareBeforeAuthProcFilter($method, $request);
+            $this->prepareBeforeAuthProcFilter($method, $state);
 
-            $request['Attributes'][sspmod_authswitcher_AuthSwitcher::MFA_PERFORMED_ATTR][] = $methodClass;
-            sspmod_authswitcher_Utils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $request, $this->reserved);
+            if (!isset($state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED])) {
+                $state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED] = array();
+            }
+            $state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED][] = $method;
+            sspmod_authswitcher_Utils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $state, $this->reserved);
         }
     }
     

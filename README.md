@@ -27,7 +27,7 @@ The modules that are going to be controlled by authswitcher need to be installed
 Add (for example) the following as the first [auth proc filter](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc#section_1):
 
 ```php
-'1' => array(
+1 => array(
     'class' => 'authswitcher:SwitchAuth',
     'dataAdapterClassName' => 'sspmod_authapi_DbDataAdapter',
     'configs' => array(
@@ -36,6 +36,7 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
             'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
             'key_id_attribute' => 'yubikey',
             'abort_if_missing' => true,
+            'assurance_attribute' => 'yubikeyAssurance',
         ),
         'simpletotp:2fa' => array(
             'secret_attr' => 'totp_secret',
@@ -43,19 +44,37 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
         ),
     ),
 ),
-// and as a safety precausion, remove the "secret" attributes
-98 => array(
+// as a safety precausion, remove the "secret" attributes
+2 => array(
     'class' => 'core:AttributeAlter',
     'subject' => 'yubikey',
     'pattern' => '/.*/',
     '%remove',
 ),
-99 => array(
+3 => array(
     'class' => 'core:AttributeAlter',
     'subject' => 'totp_secret',
     'pattern' => '/.*/',
     '%remove',
 ),
+// REFEDS
+10 => array(
+    'class' => 'core:AttributeAdd',
+    'eduPersonAssurance' => array(
+        'https://refeds.org/assurance',
+        'https://refeds.org/assurance/ID/unique',
+        'https://refeds.org/assurance/ID/no-eppn-reassign',
+        'https://refeds.org/assurance/IAP/local-enterprise',
+        'https://refeds.org/assurance/ATP/ePA-1m',
+        'https://refeds.org/assurance/ATP/ePA-1d',
+        'https://refeds.org/assurance/IAP/low',
+        'https://refeds.org/assurance/IAP/medium',
+    ),
+),
+15 => array(
+    'class' => 'authswitcher:Refeds',
+),
+
 ```
 
 All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
@@ -100,4 +119,4 @@ class aswAuthFilterMethod_foo_bar extends sspmod_authswitcher_AuthFilterMethod {
 Then configure authswitcher to use filter `foo:bar` and this class will be used.
 
 
-© 2017 CSIRT-MU
+© 2017-2018 CSIRT-MU

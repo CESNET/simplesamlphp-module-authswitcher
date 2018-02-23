@@ -10,8 +10,8 @@ abstract class sspmod_authswitcher_AuthFilterMethodWithSimpleSecret extends sspm
     }
     
     /** @override */
-    public function process(&$request) {
-        $request['Attributes'][$this->getTargetFieldName()] = $this->parameter;
+    public function process(&$state) {
+        $state['Attributes'][$this->getTargetFieldName()] = $this->parameter;
     }
     
     /** @return string */
