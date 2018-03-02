@@ -7,4 +7,9 @@ class sspmod_authswitcher_AuthSwitcher {
     const MFA_BEING_PERFORMED = 'mfa_being_performed';
     /** Minimal factor. */
     const FACTOR_MIN = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
+
+    /** REFEDS profile for SFA */
+    const SFA = 'https://refeds.org/profile/sfa';
+    /** REFEDS profile for MFA */
+    const MFA = 'https://refeds.org/profile/mfa';
 }

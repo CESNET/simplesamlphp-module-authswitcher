@@ -24,12 +24,16 @@ The modules that are going to be controlled by authswitcher need to be installed
 
 ## Use (configure as auth proc filter)
 
+For each possible authentication step, you have to add an instance of the auth proc filter `authswitcher:SwitchAuth`.
+E.g. for 3FA you have to add 2 instances, one with `factor` set to `2` (which is the default) and the other with `factor` set to `3`.
+
 Add (for example) the following as the first [auth proc filter](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc#section_1):
 
 ```php
 1 => array(
     'class' => 'authswitcher:SwitchAuth',
     'dataAdapterClassName' => 'sspmod_authapi_DbDataAdapter',
+    'factor' => 2, // default
     'configs' => array(
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
