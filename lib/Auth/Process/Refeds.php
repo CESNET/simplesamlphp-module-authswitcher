@@ -42,11 +42,11 @@ class sspmod_authswitcher_Auth_Process_Refeds extends SimpleSAML_Auth_Processing
             $state['saml:AuthnContextClassRef'] = "https://refeds.org/profile/mfa";
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/IAP/high';
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/profile/espresso';
-            $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/mfa';
+            //$state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/mfa';
         } else {
             $state['saml:AuthnContextClassRef'] = "https://refeds.org/profile/sfa";
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/profile/cappuccino';
-            $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/sfa';
+            //$state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/sfa';
         }
     }
 }

@@ -111,14 +111,17 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     
     /** @override */
     public function process(&$state) {
-        $uid = $state['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
-        $method = $this->prepareMFA($state, $uid);
-        $userCanSFA = self::ALLOW_SFA_WHEN_MFA_AVAILABLE || $method === false;
-        $userCanMFA = $method !== false;
-
         $sfa = sspmod_authswitcher_AuthSwitcher::SFA;
         $mfa = sspmod_authswitcher_AuthSwitcher::MFA;
         $both = array($sfa, $mfa);
+
+        $uid = $state['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
+        $usersCapabilities = $this->getData()->getMFAForUid($uid);
+        assert(!empty($usersCapabilities));
+        $userCanSFA = in_array($sfa, $usersCapabilities);
+        $userCanMFA = in_array($mfa, $usersCapabilities);
+        $toBePerformed = $usersCapabilities[0]; // only SFA => SFA, inactive MFA (both) => SFA, active MFA => MFA
+        // i.e. when possible, SFA is prefered
 
         $errorState = $state;
         unset($errorState[SimpleSAML_Auth_State::EXCEPTION_HANDLER_URL]);
@@ -167,28 +170,24 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
                     }
                 break;
             }
-            // SFA is prefered
-            if ($userCanSFA && $userCanMFA && empty(array_diff($both, $supportedRequestedContexts)) && array_search($sfa, $supportedRequestedContexts) < array_search($mfa, $supportedRequestedContexts)) {
-                $method = false;
+            // switch to MFA if prefered
+            if ($userCanMFA && empty(array_diff($both, $supportedRequestedContexts)) && array_search($mfa, $supportedRequestedContexts) < array_search($sfa, $supportedRequestedContexts)) {
+                $toBePerformed = $mfa;
             }
         }
         endif;
 
-        if ($method) $this->performMFA($state, $method);
+        if ($toBePerformed == $mfa) $this->performMFA($state, $uid);
     }
 
-    private function prepareMFA(&$state, $uid) {
+    private function performMFA(&$state, $uid) {
         $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $this->factor);
 
         if (count($methods) == 0) {
-            $this->logNoMethodsForFactor($uid, $this->factor);
-            return false;
+            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Inconsistent DataAdapter - no MFA methods for a user who should be able to do MFA.');
         }
 
-        return $this->chooseMethod($methods);
-    }
-
-    private function performMFA(&$state, $method) {
+        $method = $this->chooseMethod($methods);
         $methodClass = $method->method;
 
         if (!isset($this->configs[$methodClass])) {
@@ -208,15 +207,6 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
      */
     private function chooseMethod(array $methods) {
         return $methods[0];
-    }
-    
-    /** Log that a user has no methods for n-th factor. */
-    private function logNoMethodsForFactor(/*string*/ $uid, /*int*/ $factor) {
-        if ($factor == sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
-            $this->info('User '.$uid.' has no methods for factor '.$factor.'. MFA not performed at all.');
-        } else {
-            $this->info('User '.$uid.' has no methods for factor '.$factor);
-        }
     }
 }
 
