@@ -32,7 +32,6 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 ```php
 1 => array(
     'class' => 'authswitcher:SwitchAuth',
-    'dataAdapterClassName' => 'sspmod_authapi_DbDataAdapter',
     'factor' => 2, // default
     'configs' => array(
         'yubikey:OTP' => array(
@@ -81,6 +80,23 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
 
 ```
 
+Copy the file `modules/authswitcher/config-templates/module_authswitcher.php` to `config/module_authswitcher.php` and adjust its contents:
+```bash
+cp modules/authswitcher/config-templates/module_authswitcher.php config/module_authswitcher.php
+nano config/module_authswitcher.php
+```
+
+```php
+<?php
+/**
+ * This file is part of the authswitcher module.
+ */
+
+$config = array(
+    'dataAdapter' => '', // adjust
+);
+```
+
 All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
 
 The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
@@ -100,14 +116,16 @@ class MyDataAdapter implements sspmod_authswitcher_DataAdapter {
 }
 ```
 
-If you make this class available (loaded), you can then setup authswitcher to use it:
+If you make this class available (loaded), you can then setup authswitcher to use it (in `config/module_authswitcher.php`):
 ```php
-'1' => array(
-    'class' => 'authswitcher:SwitchAuth',
-    /* ... */
-    'dataAdapterClassName' => 'MyDataAdapter',
-    /* ... */
-),
+<?php
+/**
+ * This file is part of the authswitcher module.
+ */
+
+$config = array(
+    'dataAdapter' => 'MyDataAdapter',
+);
 ```
 
 ### Custom AuthFilterMethod
