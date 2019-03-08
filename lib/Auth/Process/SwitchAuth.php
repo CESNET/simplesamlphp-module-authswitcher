@@ -57,11 +57,11 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     /* logging */
     /** Log a warning. */
     private function warning(/*string*/ $message) {
-        SimpleSAML_Logger::warning(self::DEBUG_PREFIX . $message);
+        SimpleSAML\Logger::warning(self::DEBUG_PREFIX . $message);
     }
     /** Log an info. */
     private function info(/*string*/ $message) {
-        SimpleSAML_Logger::info(self::DEBUG_PREFIX . $message);
+        SimpleSAML\Logger::info(self::DEBUG_PREFIX . $message);
     }
 
     /** @override */
