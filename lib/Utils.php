@@ -15,7 +15,7 @@ class sspmod_authswitcher_Utils {
         $invalidModules = array();
         foreach ($filters as $filter) {
             list($module) = explode(":", $filter);
-            if (!SimpleSAML_Module::isModuleEnabled($module)) {
+            if (!SimpleSAML\Module::isModuleEnabled($module)) {
                 $invalidModules[] = $module;
 	    }
         }
