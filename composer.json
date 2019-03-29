@@ -1,5 +1,5 @@
 {
-  "name": "id.muni.cz/id.muni.cz-authswitcher",
+  "name": "id.muni.cz/simplesamlphp-module-authswitcher",
   "description": "A SimpleSAMLphp module for applying 2FA modules to specific users",
   "version": "1.0",
   "type": "simplesamlphp-module",
