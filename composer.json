@@ -1,0 +1,23 @@
+{
+  "name": "id.muni.cz/id.muni.cz-authswitcher",
+  "description": "A SimpleSAMLphp module for applying 2FA modules to specific users",
+  "version": "1.0",
+  "type": "simplesamlphp-module",
+  "authors": [
+    {
+      "name": "Michal Procházka",
+      "email": "michalp@ics.muni.cz"
+    },
+    {
+      "name": "Pavel Břoušek",
+      "email": "433364@muni.cz"
+    },
+    {
+      "name": "Pavel Vyskočil",
+      "email": "vyskocilpavel@muni.cz"
+    }
+  ],
+  "require": {
+    "simplesamlphp/composer-module-installer": "~1.0"
+  }
+}
