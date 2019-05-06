@@ -66,7 +66,7 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
     'eduPersonAssurance' => array(
         'https://refeds.org/assurance',
         'https://refeds.org/assurance/ID/unique',
-        'https://refeds.org/assurance/ID/no-eppn-reassign',
+        'https://refeds.org/assurance/ID/eppn-unique-no-reassign',
         'https://refeds.org/assurance/IAP/local-enterprise',
         'https://refeds.org/assurance/ATP/ePA-1m',
         'https://refeds.org/assurance/ATP/ePA-1d',
