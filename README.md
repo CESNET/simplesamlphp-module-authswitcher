@@ -7,7 +7,7 @@ Example: One user only authenticates with username and password, second uses pas
 It does not handle the settings, which can be done using the [authapi module](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authapi).
 This module retrieves the settings using class DataAdapter.
 
-The module was tested on a Debian 9 server with PHP 5.6 and SSP 1.14.
+The module was tested on a Debian 9 server with PHP 7.0 and SSP 1.16.3.
 
 ## Install
 
