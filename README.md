@@ -141,4 +141,4 @@ class aswAuthFilterMethod_foo_bar extends sspmod_authswitcher_AuthFilterMethod {
 Then configure authswitcher to use filter `foo:bar` and this class will be used.
 
 
-© 2017-2018 CSIRT-MU
+© 2017-2019 CSIRT-MU

@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../defaultAuthFilterMethods.php';
 
+/** Authentication processing filter for complying with the REFEDS Assurance Framework.
+ * @see https://wiki.refeds.org/display/ASS/REFEDS+Assurance+Framework+ver+1.0 */
 class sspmod_authswitcher_Auth_Process_Refeds extends SimpleSAML_Auth_ProcessingFilter {
     /* constants */
     const DEBUG_PREFIX = 'authswitcher:Refeds: ';
@@ -42,11 +44,9 @@ class sspmod_authswitcher_Auth_Process_Refeds extends SimpleSAML_Auth_Processing
             $state['saml:AuthnContextClassRef'] = "https://refeds.org/profile/mfa";
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/IAP/high';
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/profile/espresso';
-            //$state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/mfa';
         } else {
             $state['saml:AuthnContextClassRef'] = "https://refeds.org/profile/sfa";
             $state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/assurance/profile/cappuccino';
-            //$state['Attributes']['eduPersonAssurance'][] = 'https://refeds.org/profile/sfa';
         }
     }
 }

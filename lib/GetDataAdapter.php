@@ -1,4 +1,5 @@
 <?php
+/** Class for getting the desired data adapter. */
 class sspmod_authswitcher_GetDataAdapter {
   /** Get the desired class implementing the sspmod_authswitcher_DataAdapter interface */
   public static function getInstance() {

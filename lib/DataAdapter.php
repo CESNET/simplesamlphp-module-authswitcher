@@ -1,4 +1,5 @@
 <?php
+/** Data adapter interface. */
 interface sspmod_authswitcher_DataAdapter {
     /** The constructor */
     function __construct();
