@@ -1,7 +1,7 @@
 {
   "name": "id.muni.cz/simplesamlphp-module-authswitcher",
   "description": "A SimpleSAMLphp module for applying 2FA modules to specific users",
-  "version": "1.0",
+  "version": "1.1",
   "type": "simplesamlphp-module",
   "authors": [
     {
@@ -11,6 +11,6 @@
   ],
   "require": {
     "simplesamlphp/composer-module-installer": "~1.0",
-    "simplesamlphp/simplesamlphp": "1.16.*"
+    "simplesamlphp/simplesamlphp": "^1.17.2"
   }
 }
