@@ -7,7 +7,7 @@ Example: One user only authenticates with username and password, second uses pas
 It does not handle the settings, which can be done using the [authapi module](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authapi).
 This module retrieves the settings using class DataAdapter.
 
-The module was tested on a Debian 9 server with PHP 7.0 and SSP 1.16.3.
+The module was tested on a Debian 9 server with PHP 7.0 and SSP 1.17.2.
 
 ## Install
 
@@ -108,10 +108,10 @@ Note: Do *NOT* add separate filters for the authentication methods that are cont
 
 ### Custom DataAdapter
 
-You can write our own implementation of the [sspmod_authswitcher_DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/DataAdapter.php) interface:
+You can write our own implementation of the [\SimpleSAML\Module\authswitcher\DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/DataAdapter.php) interface:
 
 ```php
-class MyDataAdapter implements sspmod_authswitcher_DataAdapter {
+class MyDataAdapter implements \SimpleSAML\Module\authswitcher\DataAdapter {
     /* ... */
 }
 ```
@@ -130,10 +130,10 @@ $config = array(
 
 ### Custom AuthFilterMethod
 
-If you want to add a new MFA method, create a class whose name is in the form `aswAuthFilterMethod_*modulename*_*filtername*` and it extends [sspmod_authswitcher_AuthFilterMethod](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/AuthFilterMethod.php).
+If you want to add a new MFA method, create a class whose name is in the form `\SimpleSAML\Module\authswitcher\*Modulenamefiltername*` and it extends [\SimpleSAML\Module\authswitcher\AuthFilterMethod](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/AuthFilterMethod.php).
 For example for a filter named `bar` of a module named `foo`:
 ```php
-class aswAuthFilterMethod_foo_bar extends sspmod_authswitcher_AuthFilterMethod {
+class \SimpleSAML\Module\authswitcher\Foobar extends \SimpleSAML\Module\authswitcher\AuthFilterMethod {
     /* ... */
 }
 ```

@@ -1,6 +1,9 @@
 <?php
+namespace SimpleSAML\Module\authswitcher;
+
 /** Class for holding authentication method and its parameter. */
-class sspmod_authswitcher_MethodParams {
+class MethodParams
+{
     public $method;
     public $parameter;
 }

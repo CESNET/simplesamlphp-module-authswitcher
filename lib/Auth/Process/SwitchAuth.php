@@ -1,37 +1,18 @@
 <?php
-require_once __DIR__ . '/../../defaultAuthFilterMethods.php';
+namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
-/**
- * @see https://github.com/simplesamlphp/simplesamlphp/blob/simplesamlphp-1.15/modules/saml/lib/Error/NoAuthnContext.php
- */
-class NoAuthnContext extends sspmod_saml_Error
+class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 {
-    /**
-     * NoAuthnContext error constructor.
-     *
-     * @param string $responsible A string telling who is responsible for this error. Can be one of the following:
-     *   - \SAML2\Constants::STATUS_RESPONDER: in case the error is caused by this SAML responder.
-     *   - \SAML2\Constants::STATUS_REQUESTER: in case the error is caused by the SAML requester.
-     * @param string|null $message A short message explaining why this error happened.
-     * @param \Exception|null $cause An exception that caused this error.
-     */
-    public function __construct($responsible, $message = null, \Exception $cause = null)
-    {
-        parent::__construct($responsible, 'urn:oasis:names:tc:SAML:2.0:status:NoAuthnContext', $message, $cause);
-    }
-}
-
-class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_ProcessingFilter {
     /* constants */
     const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
     /** Whether to allow SFA for users that have MFA. */
     const ALLOW_SFA_WHEN_MFA_AVAILABLE = false;
 
     /* configurable attributes */
-    /** Associative array where keys are in form 'module:filter' and values are config arrays to be passed to those filters. */
+    /** Associative array with keys of the form 'module:filter', values are config arrays to be passed to filters. */
     private $configs = array();
     /** The factor (as in n-th factor authentication) of this filter instance. */
-    private $factor = sspmod_authswitcher_AuthSwitcherFactor::SECOND;
+    private $factor = \SimpleSAML\Module\authswitcher\AuthSwitcherFactor::SECOND;
 
     /** Second constructor parameter */
     private $reserved;
@@ -47,28 +28,32 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     private $requestedMFA;
 
     /** Lazy getter for DataAdapter */
-    private function getData() {
+    private function getData()
+    {
         if ($this->dataAdapter == null) {
-            $this->dataAdapter = sspmod_authswitcher_GetDataAdapter::getInstance();
+            $this->dataAdapter = \SimpleSAML\Module\authswitcher\GetDataAdapter::getInstance();
         }
         return $this->dataAdapter;
     }
     
     /* logging */
     /** Log a warning. */
-    private function warning(/*string*/ $message) {
-        SimpleSAML\Logger::warning(self::DEBUG_PREFIX . $message);
+    private function warning($message)
+    {
+        \SimpleSAML\Logger::warning(self::DEBUG_PREFIX . $message);
     }
     /** Log an info. */
-    private function info(/*string*/ $message) {
-        SimpleSAML\Logger::info(self::DEBUG_PREFIX . $message);
+    private function info($message)
+    {
+        \SimpleSAML\Logger::info(self::DEBUG_PREFIX . $message);
     }
 
     /** @override */
-    public function __construct($config, $reserved) {
+    public function __construct($config, $reserved)
+    {
         parent::__construct($config, $reserved);
 
-        assert(interface_exists('sspmod_authswitcher_DataAdapter'));
+        assert(interface_exists('\\SimpleSAML\\Module\\authswitcher\\DataAdapter'));
 
         $this->getConfig($config);
 
@@ -76,63 +61,72 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
     }
     
     /** Get configuration parameters from the config array. */
-    private function getConfig(array $config) {
+    private function getConfig(array $config)
+    {
         if (!is_array($config['configs'])) {
-            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
+            throw new \SimpleSAML\Error\Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
         $filterModules = array_keys($config['configs']);
-        $invalidModules = sspmod_authswitcher_Utils::areFilterModulesEnabled($filterModules);
+        $invalidModules = \SimpleSAML\Module\authswitcher\Utils::areFilterModulesEnabled($filterModules);
         if ($invalidModules !== true) {
-            $this->warning('Some modules ('. implode(',', $invalidModules) .') in the configuration are missing or disabled.');
+            $this->warning('Some modules ('. implode(',', $invalidModules) .')'
+                . ' in the configuration are missing or disabled.');
         }
         $this->configs = $config['configs'];
         
         if (isset($config['factor'])) {
-            if (!is_int($config['factor']) || $config['factor'] < sspmod_authswitcher_AuthSwitcher::FACTOR_MIN) {
-               throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Invalid configuration parameter factor.');
+            if (!is_int($config['factor'])
+                || $config['factor'] < \SimpleSAML\Module\authswitcher\AuthSwitcher::FACTOR_MIN) {
+                throw new \SimpleSAML\Error\Exception(self::DEBUG_PREFIX . 'Invalid configuration parameter factor.');
             }
             $this->factor = $config['factor'];
         }
     }
 
     /** Prepare before running auth proc filter (e.g. add atributes with secret keys) */
-    private function prepareBeforeAuthProcFilter(sspmod_authswitcher_MethodParams $method, &$state) {
+    private function prepareBeforeAuthProcFilter(\SimpleSAML\Module\authswitcher\MethodParams $method, &$state)
+    {
         list($module, $simpleClass) = explode(":", $method->method);
-        $filterMethodClassName = "aswAuthFilterMethod_" . $module . "_" . $simpleClass;
+        $filterMethodClassName = '\\SimpleSAML\\Module\\authswitcher\\Methods\\' . ucfirst($module) . $simpleClass;
         $filterMethod = new $filterMethodClassName($method);
         $filterMethod->process($state);
     }
 
-    private static function SFAin($contexts) {
-        return in_array(sspmod_authswitcher_AuthSwitcher::SFA, $contexts) || in_array(sspmod_authswitcher_AuthSwitcher::PASS, $contexts);
+    private static function SFAin($contexts)
+    {
+        return in_array(\SimpleSAML\Module\authswitcher\AuthSwitcher::SFA, $contexts)
+            || in_array(\SimpleSAML\Module\authswitcher\AuthSwitcher::PASS, $contexts);
     }
 
-    private static function MFAin($contexts) {
-        return in_array(sspmod_authswitcher_AuthSwitcher::MFA, $contexts);
+    private static function MFAin($contexts)
+    {
+        return in_array(\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA, $contexts);
     }
 
     /**
      * If the Comparison attribute is set to “better”, “minimum”, or “maximum”,
-     * the method of authentication must be stronger than, at least as strong as, or no stronger than one of the specified authentication classes.
-     * @throws NoAuthnContext
+     * the method of authentication must be stronger than, at least as strong as,
+     * or no stronger than one of the specified authentication classes.
+     * @throws \SimpleSAML\Module\saml\Error\NoAuthnContext
      */
-    private function testAuthnContextComparison($comparison) {
+    private function testAuthnContextComparison($comparison)
+    {
         switch ($comparison) {
             case 'better':
                 if (!$this->userCanMFA || !$this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
-            break;
+                break;
             case 'minimum':
                 if (!$this->userCanMFA && $this->requestedMFA) {
                     $this->noAuthnContextResponder();
                 }
-            break;
+                break;
             case 'maximum':
                 if (!$this->userCanSFA && $this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
-            break;
+                break;
             case 'exact':
             default:
                 if (!$this->userCanSFA && !$this->requestedSFA) {
@@ -141,94 +135,124 @@ class sspmod_authswitcher_Auth_Process_SwitchAuth extends SimpleSAML_Auth_Proces
                 if (!$this->userCanMFA && !$this->requestedMFA) {
                     $this->noAuthnContextResponder();
                 }
-            break;
+                break;
         }
     }
 
-    /** @throws NoAuthnContext */
-    private function noAuthnContextResponder() {
-        SimpleSAML_Auth_State::throwException($this->errorState, new NoAuthnContext(sspmod_authswitcher_AuthSwitcher::SAML2_STATUS_RESPONDER));
+    /** @throws \SimpleSAML\Module\saml\Error\NoAuthnContext */
+    private function noAuthnContextResponder()
+    {
+        \SimpleSAML\Auth\State::throwException(
+            $this->errorState,
+            new \SimpleSAML\Module\saml\Error\NoAuthnContext(
+                \SimpleSAML\Module\authswitcher\AuthSwitcher::SAML2_STATUS_RESPONDER
+            )
+        );
         exit;
     }
 
-    private static function isMFAprefered($supportedRequestedContexts) {
-        // assert($supportedRequestedContexts is a subset of sspmod_authswitcher_AuthSwitcher::SUPPORTED)
-        return count($supportedRequestedContexts) == 1 || $supportedRequestedContexts[0] === sspmod_authswitcher_AuthSwitcher::MFA;
+    private static function isMFAprefered($supportedRequestedContexts)
+    {
+        // assert($supportedRequestedContexts is a subset of \SimpleSAML\Module\authswitcher\AuthSwitcher::SUPPORTED)
+        return count($supportedRequestedContexts) == 1
+            || $supportedRequestedContexts[0] === \SimpleSAML\Module\authswitcher\AuthSwitcher::MFA;
     }
 
     /** @override */
-    public function process(&$state) {
+    public function process(&$state)
+    {
         // pass requested => perform SFA and return pass
         // SFA requested => perform SFA and return SFA
         // MFA requested => perform MFA and return MFA
 
-        $uid = $state['Attributes'][sspmod_authswitcher_AuthSwitcher::UID_ATTR][0];
+        $uid = $state['Attributes'][\SimpleSAML\Module\authswitcher\AuthSwitcher::UID_ATTR][0];
         $usersCapabilities = $this->getData()->getMFAForUid($uid);
         assert(!empty($usersCapabilities));
         $this->userCanSFA = self::SFAin($usersCapabilities);
         $this->userCanMFA = self::MFAin($usersCapabilities);
-        $performMFA = !$this->userCanSFA; // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
+        $performMFA = !$this->userCanSFA;
+        // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
         // i.e. when possible, SFA is prefered
 
         $this->errorState = $state;
-        unset($this->errorState[SimpleSAML_Auth_State::EXCEPTION_HANDLER_URL]);
-        $this->errorState[SimpleSAML_Auth_State::EXCEPTION_HANDLER_FUNC] = array('sspmod_saml_IdP_SAML2', 'handleAuthError');
+        unset($this->errorState[\SimpleSAML\Auth\State::EXCEPTION_HANDLER_URL]);
+        $this->errorState[\SimpleSAML\Auth\State::EXCEPTION_HANDLER_FUNC]
+            = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
 
-        if (isset($state['saml:RequestedAuthnContext']) && isset($state['saml:RequestedAuthnContext']['AuthnContextClassRef'])):
-        $requestedAuthnContext = $state['saml:RequestedAuthnContext'];
-        $requestedContexts = $requestedAuthnContext['AuthnContextClassRef'];
-        $supportedRequestedContexts = array_intersect($requestedAuthnContext['AuthnContextClassRef'], sspmod_authswitcher_AuthSwitcher::SUPPORTED);
+        if (isset($state['saml:RequestedAuthnContext'])
+            && isset($state['saml:RequestedAuthnContext']['AuthnContextClassRef'])) :
+            $requestedAuthnContext = $state['saml:RequestedAuthnContext'];
+            $requestedContexts = $requestedAuthnContext['AuthnContextClassRef'];
+            $supportedRequestedContexts = array_intersect(
+                $requestedAuthnContext['AuthnContextClassRef'],
+                \SimpleSAML\Module\authswitcher\AuthSwitcher::SUPPORTED
+            );
 
-        if (!empty($requestedContexts) && empty($supportedRequestedContexts)) {
-            SimpleSAML_Auth_State::throwException($this->errorState, new NoAuthnContext(sspmod_authswitcher_AuthSwitcher::SAML2_STATUS_REQUESTER));
-            exit;
-        }
-
-        $this->requestedSFA = self::SFAin($supportedRequestedContexts);
-        $this->requestedMFA = self::MFAin($supportedRequestedContexts);
-        if (!empty($supportedRequestedContexts)) {
-            // check for unsatisfiable combinations
-            $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
-            // switch to MFA if prefered
-            if ($this->userCanMFA && self::isMFAprefered($supportedRequestedContexts)) {
-                $performMFA = true;
+            if (!empty($requestedContexts) && empty($supportedRequestedContexts)) {
+                \SimpleSAML\Auth\State::throwException(
+                    $this->errorState,
+                    new \SimpleSAML\Module\saml\Error\NoAuthnContext(
+                        \SimpleSAML\Module\authswitcher\AuthSwitcher::SAML2_STATUS_REQUESTER
+                    )
+                );
+                exit;
             }
-        }
+
+            $this->requestedSFA = self::SFAin($supportedRequestedContexts);
+            $this->requestedMFA = self::MFAin($supportedRequestedContexts);
+            if (!empty($supportedRequestedContexts)) {
+                // check for unsatisfiable combinations
+                $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
+                // switch to MFA if prefered
+                if ($this->userCanMFA && self::isMFAprefered($supportedRequestedContexts)) {
+                    $performMFA = true;
+                }
+            }
         endif;
-        if ($performMFA) $this->performMFA($state, $uid);
+        if ($performMFA) {
+            $this->performMFA($state, $uid);
+        }
     }
 
     /**
      * Perform the appropriate MFA.
      */
-    private function performMFA(&$state, $uid) {
+    private function performMFA(&$state, $uid)
+    {
         $methods = $this->getData()->getMethodsActiveForUidAndFactor($uid, $this->factor);
 
         if (count($methods) == 0) {
-            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Inconsistent DataAdapter - no MFA methods for a user who should be able to do MFA.');
+            throw new \SimpleSAML\Error\Exception(self::DEBUG_PREFIX
+                . 'Inconsistent DataAdapter - no MFA methods for a user who should be able to do MFA.');
         }
 
         $method = $this->chooseMethod($methods);
         $methodClass = $method->method;
 
         if (!isset($this->configs[$methodClass])) {
-            throw new SimpleSAML_Error_Exception(self::DEBUG_PREFIX . 'Configuration for ' . $methodClass . ' is missing.');
+            throw new \SimpleSAML\Error\Exception(self::DEBUG_PREFIX
+                . 'Configuration for ' . $methodClass . ' is missing.');
         }
         $this->prepareBeforeAuthProcFilter($method, $state);
 
-        if (!isset($state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED])) {
-            $state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED] = array();
+        if (!isset($state[\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA_BEING_PERFORMED])) {
+            $state[\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA_BEING_PERFORMED] = array();
         }
-        $state[sspmod_authswitcher_AuthSwitcher::MFA_BEING_PERFORMED][] = $method;
-        sspmod_authswitcher_Utils::runAuthProcFilter($methodClass, $this->configs[$methodClass], $state, $this->reserved);
+        $state[\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA_BEING_PERFORMED][] = $method;
+        \SimpleSAML\Module\authswitcher\Utils::runAuthProcFilter(
+            $methodClass,
+            $this->configs[$methodClass],
+            $state,
+            $this->reserved
+        );
     }
     
     /**
      * Choose an appropriate method from the set.
      * @todo filter methods based on device (availability)
      */
-    private function chooseMethod(array $methods) {
+    private function chooseMethod(array $methods)
+    {
         return $methods[0];
     }
 }
-

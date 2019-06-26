@@ -1,16 +1,21 @@
 <?php
+namespace SimpleSAML\Module\authswitcher;
+
 /** Abstract class for authentication methods which only require an array of secret string(s) in an attribute. */
-abstract class sspmod_authswitcher_AuthFilterMethodWithSimpleSecret extends sspmod_authswitcher_AuthFilterMethod {
+abstract class AuthFilterMethodWithSimpleSecret extends \SimpleSAML\Module\authswitcher\AuthFilterMethod
+{
     /** Secret key etc. */
     protected $parameter;
 
     /** @override */
-    public function __construct(sspmod_authswitcher_MethodParams $methodParams) {
+    public function __construct(\SimpleSAML\Module\authswitcher\MethodParams $methodParams)
+    {
         $this->parameter = explode(',', $methodParams->parameter);
     }
     
     /** @override */
-    public function process(&$state) {
+    public function process(&$state)
+    {
         $state['Attributes'][$this->getTargetFieldName()] = $this->parameter;
     }
     

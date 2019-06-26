@@ -1,10 +1,13 @@
 <?php
+namespace SimpleSAML\Module\authswitcher;
+
 /** Data adapter interface. */
-interface sspmod_authswitcher_DataAdapter {
+interface DataAdapter
+{
     /** The constructor */
-    function __construct();
-    /** Return an array of sspmod_authswitcher_MethodParams */
-    function getMethodsActiveForUidAndFactor(/*string*/ $uid, /*int*/ $factor);
+    public function __construct();
+    /** Return an array of \SimpleSAML\Module\authswitcher\MethodParams */
+    public function getMethodsActiveForUidAndFactor($uid, /*int*/ $factor);
     /** Test whether the user can login via SFA, MFA or both. */
-    function getMFAForUid(/*string*/ $uid);
+    public function getMFAForUid($uid);
 }

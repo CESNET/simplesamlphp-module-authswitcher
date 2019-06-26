@@ -1,7 +1,10 @@
 <?php
-/** Concrete subclasses will be named aswAuthFilterMethod_modulename_filtername */
-abstract class sspmod_authswitcher_AuthFilterMethod {
+namespace SimpleSAML\Module\authswitcher;
+
+/** Concrete subclasses will be named \SimpleSAML\Module\authswitcher\Methods\modulenamefiltername */
+abstract class AuthFilterMethod
+{
     abstract public function process(&$state);
-    abstract public function __construct(sspmod_authswitcher_MethodParams $methodParams);
+    abstract public function __construct(\SimpleSAML\Module\authswitcher\MethodParams $methodParams);
     abstract public function wasPerformed(&$state);
 }
