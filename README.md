@@ -24,15 +24,11 @@ The modules that are going to be controlled by authswitcher need to be installed
 
 ## Use (configure as auth proc filter)
 
-For each possible authentication step, you have to add an instance of the auth proc filter `authswitcher:SwitchAuth`.
-E.g. for 3FA you have to add 2 instances, one with `factor` set to `2` (which is the default) and the other with `factor` set to `3`.
-
-Add (for example) the following as the first [auth proc filter](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc#section_1):
+Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 
 ```php
-1 => array(
+50 => array(
     'class' => 'authswitcher:SwitchAuth',
-    'factor' => 2, // default
     'configs' => array(
         'yubikey:OTP' => array(
             'api_client_id' => '12345', // change to your API client ID
@@ -48,20 +44,20 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
     ),
 ),
 // as a safety precausion, remove the "secret" attributes
-2 => array(
+52 => array(
     'class' => 'core:AttributeAlter',
     'subject' => 'yubikey',
     'pattern' => '/.*/',
     '%remove',
 ),
-3 => array(
+53 => array(
     'class' => 'core:AttributeAlter',
     'subject' => 'totp_secret',
     'pattern' => '/.*/',
     '%remove',
 ),
 // REFEDS
-10 => array(
+55 => array(
     'class' => 'core:AttributeAdd',
     'eduPersonAssurance' => array(
         'https://refeds.org/assurance',
@@ -74,11 +70,13 @@ Add (for example) the following as the first [auth proc filter](https://simplesa
         'https://refeds.org/assurance/IAP/medium',
     ),
 ),
-15 => array(
+60 => array(
     'class' => 'authswitcher:Refeds',
 ),
 
 ```
+
+IMPORTANT: The modules MUST enforce 2FA. Also, the modules have to handle multiple tokens if desired.
 
 Copy the file `modules/authswitcher/config-templates/module_authswitcher.php` to `config/module_authswitcher.php` and adjust its contents:
 ```bash
@@ -96,8 +94,6 @@ $config = array(
     'dataAdapter' => '', // adjust
 );
 ```
-
-All MFA modules should enforce 2FA etc. as they are only run for users that have turned them on.
 
 The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
 Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa. To add more, you have to write [custom AuthFilterMethod](#custom-authfiltermethod)s.

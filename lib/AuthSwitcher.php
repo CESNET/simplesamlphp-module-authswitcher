@@ -8,8 +8,6 @@ class AuthSwitcher
     const UID_ATTR = 'uid';
     /** Name of the MFA being performed attribute. */
     const MFA_BEING_PERFORMED = 'mfa_being_performed';
-    /** Minimal factor. */
-    const FACTOR_MIN = \SimpleSAML\Module\authswitcher\AuthSwitcherFactor::SECOND;
 
     /** REFEDS profile for SFA */
     const SFA = 'https://refeds.org/profile/sfa';

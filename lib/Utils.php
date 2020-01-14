@@ -9,12 +9,11 @@ class Utils
     public static function runAuthProcFilter($nestedClass, array $config, &$state, $reserved)
     {
         list($module, $simpleClass) = explode(":", $nestedClass);
-        $className = 'sspmod_'.$module.'_Auth_Process_'.$simpleClass;
+        $className = '\\SimpleSAML\\Module\\'.$module.'\\Auth\\Process\\'.$simpleClass;
         $authFilter = new $className($config, $reserved);
         $authFilter->process($state);
     }
     
-    /** Check if all modules for the specified filters are installed and enabled. */
     public static function areFilterModulesEnabled(array $filters)
     {
         $invalidModules = array();

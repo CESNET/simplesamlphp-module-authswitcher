@@ -1,6 +1,8 @@
 <?php
 namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
+use SimpleSAML\Module\authswitcher\AuthSwitcher;
+
 /** Authentication processing filter for complying with the REFEDS Assurance Framework.
  * @see https://wiki.refeds.org/display/ASS/REFEDS+Assurance+Framework+ver+1.0 */
 class Refeds extends \SimpleSAML\Auth\ProcessingFilter
@@ -19,27 +21,7 @@ class Refeds extends \SimpleSAML\Auth\ProcessingFilter
       * If everything is configured correctly, this should not throw an exception. */
     private function wasMFAPerformed(&$state)
     {
-        $mfaPerformed = false;
-        if (isset($state[\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA_BEING_PERFORMED])) {
-            foreach ($state[\SimpleSAML\Module\authswitcher\AuthSwitcher::MFA_BEING_PERFORMED] as $method) {
-                if ($this->wasAuthProcFilterRun($method, $state)) {
-                    $mfaPerformed = true;
-                } else {
-                    throw new \SimpleSAML\Error\Exception(self::DEBUG_PREFIX . 'The auth proc filter ' . $method->method
-                        . ' did not run. This probably means invalid configuration.');
-                }
-            }
-        }
-        return $mfaPerformed;
-    }
-
-    /** Check if an auth proc filter was actually run */
-    private function wasAuthProcFilterRun(\SimpleSAML\Module\authswitcher\MethodParams $method, &$state)
-    {
-        list($module, $simpleClass) = explode(":", $method->method);
-        $filterMethodClassName = '\\SimpleSAML\\Module\\authswitcher\\Methods\\' . ucfirst($module) . $simpleClass;
-        $filterMethod = new $filterMethodClassName($method);
-        return $filterMethod->wasPerformed($state);
+        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]);
     }
 
     /** Add attributes to eduPersonAssurance considering SFA/MFA.
