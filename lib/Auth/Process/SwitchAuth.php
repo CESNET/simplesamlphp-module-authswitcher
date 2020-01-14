@@ -1,58 +1,51 @@
 <?php
+
 namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
-use SimpleSAML\Logger;
-use SimpleSAML\Error\Exception;
-use SimpleSAML\Module\authswitcher\Utils;
-use SimpleSAML\Module\authswitcher\AuthSwitcher;
 use SimpleSAML\Auth\State;
-use SimpleSAML\Module\saml\Error\NoAuthnContext;
-use PDO;
-use SimpleSAML\Database;
 use SimpleSAML\Configuration;
+use SimpleSAML\Database;
+use SimpleSAML\Error\Exception;
+use SimpleSAML\Logger;
+use SimpleSAML\Module\authswitcher\AuthSwitcher;
+use SimpleSAML\Module\authswitcher\Utils;
+use SimpleSAML\Module\saml\Error\NoAuthnContext;
 
 class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 {
+    /* constants */
+    private const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
+
+    /** Whether to allow SFA for users that have MFA. */
+    private const ALLOW_SFA_WHEN_MFA_AVAILABLE = false;
+
+    private const UID_COL = 'userid';
+
+    private const CONFIG_FILE = 'module_authswitcher.php';
+
     /** DB table for storing MFA methods */
     private $mfa_table = 'auth_method_setting';
-    /* constants */
-    const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
-    /** Whether to allow SFA for users that have MFA. */
-    const ALLOW_SFA_WHEN_MFA_AVAILABLE = false;
 
     /* configurable attributes */
+
     /** Associative array with keys of the form 'module:filter', values are config arrays to be passed to filters. */
-    private $configs = array();
+    private $configs = [];
 
     /** Second constructor parameter */
     private $reserved;
-    /** DataAdapter for getting users' settings. */
-    private $dataAdapter = null;
 
     /** State with exception handler set. */
     private $errorState;
 
     private $userCanSFA;
+
     private $userCanMFA;
+
     private $requestedSFA;
+
     private $requestedMFA;
 
     private $db;
-
-    private const UID_COL = 'userid';
-    private const CONFIG_FILE = 'module_authswitcher.php';
-
-    /* logging */
-    /** Log a warning. */
-    private function warning($message)
-    {
-        Logger::warning(self::DEBUG_PREFIX . $message);
-    }
-    /** Log an info. */
-    private function info($message)
-    {
-        Logger::info(self::DEBUG_PREFIX . $message);
-    }
 
     /** @override */
     public function __construct($config, $reserved)
@@ -63,7 +56,73 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         $this->reserved = $reserved;
     }
-    
+
+    /** @override */
+    public function process(&$state)
+    {
+        // pass requested => perform SFA and return pass
+        // SFA requested => perform SFA and return SFA
+        // MFA requested => perform MFA and return MFA
+
+        $uid = $state['Attributes'][AuthSwitcher::UID_ATTR][0];
+        $usersCapabilities = $this->getMFAForUid($uid);
+        assert(!empty($usersCapabilities));
+        $this->userCanSFA = self::SFAin($usersCapabilities);
+        $this->userCanMFA = self::MFAin($usersCapabilities);
+        $performMFA = !$this->userCanSFA;
+        // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
+        // i.e. when possible, SFA is prefered
+
+        $this->errorState = $state;
+        unset($this->errorState[State::EXCEPTION_HANDLER_URL]);
+        $this->errorState[State::EXCEPTION_HANDLER_FUNC]
+            = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
+
+        if (
+            isset($state['saml:RequestedAuthnContext'])
+            && isset($state['saml:RequestedAuthnContext']['AuthnContextClassRef'])
+        ) :
+            $requestedAuthnContext = $state['saml:RequestedAuthnContext'];
+            $requestedContexts = $requestedAuthnContext['AuthnContextClassRef'];
+            $supportedRequestedContexts = array_intersect(
+                $requestedAuthnContext['AuthnContextClassRef'],
+                AuthSwitcher::SUPPORTED
+            );
+
+            if (!empty($requestedContexts) && empty($supportedRequestedContexts)) {
+                State::throwException(
+                    $this->errorState,
+                    new NoAuthnContext(
+                        AuthSwitcher::SAML2_STATUS_REQUESTER
+                    )
+                );
+                exit;
+            }
+
+            $this->requestedSFA = self::SFAin($supportedRequestedContexts);
+            $this->requestedMFA = self::MFAin($supportedRequestedContexts);
+            if (!empty($supportedRequestedContexts)) {
+                // check for unsatisfiable combinations
+                $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
+                // switch to MFA if prefered
+                if ($this->userCanMFA && self::isMFAprefered($supportedRequestedContexts)) {
+                    $performMFA = true;
+                }
+            }
+        endif;
+        if ($performMFA) {
+            $this->performMFA($state, $uid);
+        }
+    }
+
+    /* logging */
+
+    /** Log a warning. */
+    private function warning($message)
+    {
+        Logger::warning(self::DEBUG_PREFIX . $message);
+    }
+
     /** Get configuration parameters from the config array. */
     private function getConfig(array $config)
     {
@@ -73,23 +132,25 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $filterModules = array_keys($config['configs']);
         $invalidModules = Utils::areFilterModulesEnabled($filterModules);
         if ($invalidModules !== true) {
-            $this->warning('Some modules ('. implode(',', $invalidModules) .')'
+            $this->warning('Some modules (' . implode(',', $invalidModules) . ')'
                 . ' in the configuration are missing or disabled.');
         }
         $this->configs = $config['configs'];
 
-        $this->db = Database::getInstance(Configuration::getOptionalConfig(self::CONFIG_FILE)->getConfigItem('store', []));
+        $this->db = Database::getInstance(
+            Configuration::getOptionalConfig(self::CONFIG_FILE)->getConfigItem('store', [])
+        );
     }
 
     private static function SFAin($contexts)
     {
-        return in_array(AuthSwitcher::SFA, $contexts)
-            || in_array(AuthSwitcher::PASS, $contexts);
+        return in_array(AuthSwitcher::SFA, $contexts, true)
+            || in_array(AuthSwitcher::PASS, $contexts, true);
     }
 
     private static function MFAin($contexts)
     {
-        return in_array(AuthSwitcher::MFA, $contexts);
+        return in_array(AuthSwitcher::MFA, $contexts, true);
     }
 
     /**
@@ -143,70 +204,15 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private static function isMFAprefered($supportedRequestedContexts)
     {
         // assert($supportedRequestedContexts is a subset of AuthSwitcher::SUPPORTED)
-        return count($supportedRequestedContexts) == 1
+        return count($supportedRequestedContexts) === 1
             || $supportedRequestedContexts[0] === AuthSwitcher::MFA;
     }
 
-    /** @override */
-    public function process(&$state)
+    private function getMFAForUid($uid)
     {
-        // pass requested => perform SFA and return pass
-        // SFA requested => perform SFA and return SFA
-        // MFA requested => perform MFA and return MFA
-
-        $uid = $state['Attributes'][AuthSwitcher::UID_ATTR][0];
-        $usersCapabilities = $this->getMFAForUid($uid);
-        assert(!empty($usersCapabilities));
-        $this->userCanSFA = self::SFAin($usersCapabilities);
-        $this->userCanMFA = self::MFAin($usersCapabilities);
-        $performMFA = !$this->userCanSFA;
-        // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
-        // i.e. when possible, SFA is prefered
-
-        $this->errorState = $state;
-        unset($this->errorState[State::EXCEPTION_HANDLER_URL]);
-        $this->errorState[State::EXCEPTION_HANDLER_FUNC]
-            = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
-
-        if (isset($state['saml:RequestedAuthnContext'])
-            && isset($state['saml:RequestedAuthnContext']['AuthnContextClassRef'])) :
-            $requestedAuthnContext = $state['saml:RequestedAuthnContext'];
-            $requestedContexts = $requestedAuthnContext['AuthnContextClassRef'];
-            $supportedRequestedContexts = array_intersect(
-                $requestedAuthnContext['AuthnContextClassRef'],
-                AuthSwitcher::SUPPORTED
-            );
-
-            if (!empty($requestedContexts) && empty($supportedRequestedContexts)) {
-                State::throwException(
-                    $this->errorState,
-                    new NoAuthnContext(
-                        AuthSwitcher::SAML2_STATUS_REQUESTER
-                    )
-                );
-                exit;
-            }
-
-            $this->requestedSFA = self::SFAin($supportedRequestedContexts);
-            $this->requestedMFA = self::MFAin($supportedRequestedContexts);
-            if (!empty($supportedRequestedContexts)) {
-                // check for unsatisfiable combinations
-                $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
-                // switch to MFA if prefered
-                if ($this->userCanMFA && self::isMFAprefered($supportedRequestedContexts)) {
-                    $performMFA = true;
-                }
-            }
-        endif;
-        if ($performMFA) {
-            $this->performMFA($state, $uid);
-        }
-    }
-
-    private function getMFAForUid($uid) {
-        $active = $this->db->read('SELECT MAX(active) FROM '. $this->mfa_table .
-            ' WHERE '.self::UID_COL.' = :uid LIMIT 1', ['uid'=>$uid])->fetchColumn();
-        $result = array();
+        $active = $this->db->read('SELECT MAX(active) FROM ' . $this->mfa_table .
+            ' WHERE ' . self::UID_COL . ' = :uid LIMIT 1', ['uid' => $uid])->fetchColumn();
+        $result = [];
         if ($active === null || $active <= 0) {
             $result[] = AuthSwitcher::SFA;
         }
@@ -216,9 +222,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         return $result;
     }
 
-    private function getActiveMethod($uid) {
-        return $this->db->read('SELECT method FROM '. $this->mfa_table
-            . ' WHERE '.self::UID_COL.' = :uid ORDER BY priority ASC', ['uid'=>$uid])
+    private function getActiveMethod($uid)
+    {
+        return $this->db->read('SELECT method FROM ' . $this->mfa_table
+            . ' WHERE ' . self::UID_COL . ' = :uid ORDER BY priority ASC', ['uid' => $uid])
             ->fetchColumn();
     }
 
@@ -231,7 +238,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         if (empty($method)) {
             throw new Exception(self::DEBUG_PREFIX
-                . 'Inconsistent DataAdapter - no MFA methods for a user who should be able to do MFA.');
+                . 'Inconsistent data - no MFA methods for a user who should be able to do MFA.');
         }
 
         if (!isset($this->configs[$method])) {
