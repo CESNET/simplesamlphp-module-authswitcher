@@ -16,9 +16,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     /* constants */
     private const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
 
-    /** Whether to allow SFA for users that have MFA. */
-    private const ALLOW_SFA_WHEN_MFA_AVAILABLE = false;
-
     private const UID_COL = 'userid';
 
     private const CONFIG_FILE = 'module_authswitcher.php';
@@ -216,7 +213,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if ($active === null || $active <= 0) {
             $result[] = AuthSwitcher::SFA;
         }
-        if ($active !== null && $active >= 1) {
+        if ($active !== null && $active >= 0) {
             $result[] = AuthSwitcher::MFA;
         }
         return $result;

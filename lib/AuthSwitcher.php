@@ -5,8 +5,11 @@ namespace SimpleSAML\Module\authswitcher;
 /** Module-wide constants. */
 class AuthSwitcher
 {
-    /** Name of the uid attribute. */
-    public const UID_ATTR = 'uid';
+    /**
+     * Name of the uid attribute.
+     * @todo make configurable
+     */
+    public const UID_ATTR = 'eduPersonPrincipalName';
 
     /** Name of the MFA being performed attribute. */
     public const MFA_BEING_PERFORMED = 'mfa_being_performed';
