@@ -4,10 +4,9 @@ Module for toggling [authentication processing filters](https://simplesamlphp.or
 
 Example: One user only authenticates with username and password, second uses password and YubiKey and third user logs in with password and TOTP.
 
-It does not handle the settings, which can be done using the [authapi module](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authapi).
-This module retrieves the settings using class DataAdapter.
+The settings are retrieved using `\SimpleSAML\Database`.
 
-The module was tested on a Debian 9 server with PHP 7.0 and SSP 1.17.2.
+The module was tested on a Debian 9 server with PHP 7.4 and SSP 1.18.3.
 
 ## Install
 
