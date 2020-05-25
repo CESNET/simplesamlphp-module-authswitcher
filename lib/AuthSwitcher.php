@@ -21,7 +21,7 @@ class AuthSwitcher
     public const MFA = 'https://refeds.org/profile/mfa';
 
     /** Password AuthnContext */
-    public const PASS = 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password';
+    public const PASS = 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport';
 
     /** Supported AuthnContexts (pass <= sfa < mfa) */
     public const SUPPORTED = [self::PASS, self::SFA, self::MFA];
