@@ -176,10 +176,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 break;
             case 'exact':
             default:
-                if (!$this->userCanSFA && !$this->requestedSFA) {
+                if (!$this->userCanMFA && !$this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
-                if (!$this->userCanMFA && !$this->requestedMFA) {
+                if (!$this->userCanSFA && !$this->requestedMFA) {
                     $this->noAuthnContextResponder();
                 }
                 break;
@@ -200,9 +200,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private static function isMFAprefered($supportedRequestedContexts)
     {
-        // assert($supportedRequestedContexts is a subset of AuthSwitcher::SUPPORTED)
-        return count($supportedRequestedContexts) === 1
-            || $supportedRequestedContexts[0] === AuthSwitcher::MFA;
+        // assert($supportedRequestedContexts is a nonempty subset of AuthSwitcher::SUPPORTED)
+        return $supportedRequestedContexts[0] === AuthSwitcher::MFA;
     }
 
     private function getMFAForUid($uid)
