@@ -44,19 +44,22 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private $db;
 
+    private $config;
+
     /** @override */
     public function __construct($config, $reserved)
     {
         parent::__construct($config, $reserved);
 
-        $this->getConfig($config);
-
+        $this->config = $config;
         $this->reserved = $reserved;
     }
 
     /** @override */
     public function process(&$state)
     {
+        $this->getConfig($this->config);
+
         // pass requested => perform SFA and return pass
         // SFA requested => perform SFA and return SFA
         // MFA requested => perform MFA and return MFA
