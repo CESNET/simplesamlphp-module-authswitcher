@@ -10,7 +10,7 @@ use SimpleSAML\Configuration;
 use SimpleSAML\Database;
 use SimpleSAML\Module\totp\Storage;
 
-class DatabaseStorage implements Storage, \SimpleSAML\Module\totp\Storage
+class DatabaseStorage implements Storage
 {
     protected const CONFIG_FILE = 'module_authswitcher.php';
 
