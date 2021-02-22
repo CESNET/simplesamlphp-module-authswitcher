@@ -53,10 +53,9 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
 
     /**
      * Callback to call on subject
-     * @var Callable
+     * @var callable
      */
     private $callback = null;
-
 
     /**
      * Initialize this filter.
@@ -99,12 +98,11 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
                 // Set callback
                 $this->callback = $value;
                 if (!is_callable($this->callback)) {
-                    throw new Error\Exception("Callback is not callable.");
+                    throw new Error\Exception('Callback is not callable.');
                 }
             }
         }
     }
-
 
     /**
      * Apply the filter to modify attributes.
@@ -113,7 +111,6 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
      *
      * @param array &$request The current request.
      * @throws \SimpleSAML\Error\Exception In case of invalid configuration.
-     * @return void
      */
     public function process(&$request)
     {
@@ -125,7 +122,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
 
         // check that all required params are set in config
         if (empty($this->pattern) || empty($this->subject)) {
-            throw new Error\Exception("Not all params set in config.");
+            throw new Error\Exception('Not all params set in config.');
         }
 
         if (!$this->replace && !$this->remove && $this->replacement === false && $this->callback === null) {

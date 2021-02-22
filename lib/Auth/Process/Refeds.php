@@ -8,9 +8,6 @@ use SimpleSAML\Module\authswitcher\AuthSwitcher;
  * @see https://wiki.refeds.org/display/ASS/REFEDS+Assurance+Framework+ver+1.0 */
 class Refeds extends \SimpleSAML\Auth\ProcessingFilter
 {
-    /* constants */
-    private const DEBUG_PREFIX = 'authswitcher:Refeds: ';
-
     /** @override */
     public function process(&$state)
     {
