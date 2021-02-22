@@ -10,12 +10,7 @@ The module was tested on a Debian 9 server with PHP 7.4 and SSP 1.18.3.
 
 ## Install
 
-Copy the contents of this repository (folder) into a folder named `authswitcher` in your SSP installation's `modules` folder.
-
-```
-cd modules
-git clone https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher.git authswitcher
-```
+You have to install this module using Composer together with SimpleSAMLphp so that dependencies are installed as well.
 
 The module is enabled by default.
 
