@@ -94,6 +94,26 @@ Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa.
 
 Note: Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
 
+## Perun integration
+
+In order to use PerunStorage and sync tokens with Perun, you have to add configuration options to `module-authswitcher.php`:
+
+```
+$config = [
+  // ...
+  'PerunStorage' => [
+    'apiURL' => 'https://id.muni.cz/mfaapi/token',
+    'OIDCKeyStore' => '/var/oidc-keystore.jwks',
+    //'OIDCKeyId' => 'rsa1',
+    //'OIDCTokenTimeout' => 300,
+    //'OIDCTokenAlg' => 'RS256',
+    'OIDCIssuer' => 'https://oidc.muni.cz/oidc/',
+    'OIDCClientId' => 'd574aeba-b2d0-4234-bcf0-53ec30b17ba4',
+  ],
+  //...
+];
+```
+
 ## Extend this module
 
 ### Custom DataAdapter
