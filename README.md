@@ -21,39 +21,39 @@ The modules that are going to be controlled by authswitcher need to be installed
 Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 
 ```php
-50 => array(
+50 => [
     'class' => 'authswitcher:SwitchAuth',
-    'configs' => array(
-        'yubikey:OTP' => array(
+    'configs' => [
+        'yubikey:OTP' => [
             'api_client_id' => '12345', // change to your API client ID
             'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
             'key_id_attribute' => 'yubikey',
             'abort_if_missing' => true,
             'assurance_attribute' => 'yubikeyAssurance',
-        ),
-        'simpletotp:2fa' => array(
+        ],
+        'simpletotp:2fa' => [
             'secret_attr' => 'totp_secret',
             'enforce_2fa' => true,
-        ),
-    ),
-),
+        ],
+    ],
+],
 // as a safety precausion, remove the "secret" attributes
-52 => array(
+52 => [
     'class' => 'core:AttributeAlter',
     'subject' => 'yubikey',
     'pattern' => '/.*/',
     '%remove',
-),
-53 => array(
+],
+53 => [
     'class' => 'core:AttributeAlter',
     'subject' => 'totp_secret',
     'pattern' => '/.*/',
     '%remove',
-),
+],
 // REFEDS
-55 => array(
+55 => [
     'class' => 'core:AttributeAdd',
-    'eduPersonAssurance' => array(
+    'eduPersonAssurance' => [
         'https://refeds.org/assurance',
         'https://refeds.org/assurance/ID/unique',
         'https://refeds.org/assurance/ID/eppn-unique-no-reassign',
@@ -62,11 +62,11 @@ Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
         'https://refeds.org/assurance/ATP/ePA-1d',
         'https://refeds.org/assurance/IAP/low',
         'https://refeds.org/assurance/IAP/medium',
-    ),
-),
-60 => array(
+    ],
+],
+60 => [
     'class' => 'authswitcher:Refeds',
-),
+],
 
 ```
 
@@ -84,9 +84,9 @@ nano config/module_authswitcher.php
  * This file is part of the authswitcher module.
  */
 
-$config = array(
+$config = [
     'dataAdapter' => '', // adjust
-);
+];
 ```
 
 The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
@@ -113,9 +113,9 @@ If you make this class available (loaded), you can then setup authswitcher to us
  * This file is part of the authswitcher module.
  */
 
-$config = array(
+$config = [
     'dataAdapter' => 'MyDataAdapter',
-);
+];
 ```
 
 ### Custom AuthFilterMethod
