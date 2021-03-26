@@ -30,15 +30,5 @@ class DatabaseStorage implements Storage
             . 'VALUES (:uid,:attribute,:value)',
             ['uid' => $userId, 'attribute' => 'totp_secret', 'value' => $secret]
         );
-        $this->savePreference($userId, $label);
-    }
-
-    protected function savePreference($userId, $label)
-    {
-        $this->db->write(
-            'INSERT INTO auth_method_setting (userid,method,tag) '
-            . 'VALUES (:uid,:method,:tag)',
-            ['uid' => $userId, 'method' => 'totp:Totp', 'tag' => $label]
-        );
     }
 }

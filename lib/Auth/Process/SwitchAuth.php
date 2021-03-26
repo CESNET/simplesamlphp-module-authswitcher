@@ -10,18 +10,22 @@ use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
 use SimpleSAML\Module\authswitcher\Utils;
 use SimpleSAML\Module\saml\Error\NoAuthnContext;
+use Detection\MobileDetect;
 
 class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 {
     /* constants */
     private const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
 
-    private const UID_COL = 'userid';
+    private const MFA_TOKENS = 'mfaTokens';
 
-    private const CONFIG_FILE = 'module_authswitcher.php';
+    private const TOTP = 'TOTP';
 
-    /** DB table for storing MFA methods */
-    private $mfa_table = 'auth_method_setting';
+    private const WEBAUTHN = 'webauthn';
+
+    private const WEBAUTHN_WEBAUTHN = 'webauthn:WebAuthn';
+
+    private const TOTP_TOTP = 'totp:Totp';
 
     /* configurable attributes */
 
@@ -41,8 +45,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private $requestedSFA;
 
     private $requestedMFA;
-
-    private $db;
 
     private $config;
 
@@ -64,8 +66,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         // SFA requested => perform SFA and return SFA
         // MFA requested => perform MFA and return MFA
 
-        $uid = $state['Attributes'][AuthSwitcher::UID_ATTR][0];
-        $usersCapabilities = $this->getMFAForUid($uid);
+        $usersCapabilities = $this->getMFAForUid($state);
         assert(!empty($usersCapabilities));
         $this->userCanSFA = self::SFAin($usersCapabilities);
         $this->userCanMFA = self::MFAin($usersCapabilities);
@@ -111,19 +112,23 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             }
         endif;
         if ($performMFA) {
-            $this->performMFA($state, $uid);
+            $this->performMFA($state);
         }
     }
 
     /* logging */
 
-    /** Log a warning. */
+    /** Log a warning.
+     * @param $message
+     */
     private function warning($message)
     {
         Logger::warning(self::DEBUG_PREFIX . $message);
     }
 
-    /** Get configuration parameters from the config array. */
+    /** Get configuration parameters from the config array.
+     * @param array $config
+     */
     private function getConfig(array $config)
     {
         if (!is_array($config['configs'])) {
@@ -136,10 +141,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 . ' in the configuration are missing or disabled.');
         }
         $this->configs = $config['configs'];
-
-        $this->db = Database::getInstance(
-            Configuration::getOptionalConfig(self::CONFIG_FILE)->getConfigItem('store', [])
-        );
     }
 
     private static function SFAin($contexts)
@@ -207,33 +208,58 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         return $supportedRequestedContexts[0] === AuthSwitcher::MFA;
     }
 
-    private function getMFAForUid($uid)
+    private function getMFAForUid($state)
     {
-        $active = $this->db->read('SELECT MAX(active) FROM ' . $this->mfa_table .
-            ' WHERE ' . self::UID_COL . ' = :uid LIMIT 1', ['uid' => $uid])->fetchColumn();
         $result = [];
-        if ($active === null || $active <= 0) {
-            $result[] = AuthSwitcher::SFA;
+        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
+            foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+                $token = json_decode($mfaToken, true);
+                if ($token["revoked"] === false) {
+                    $result[] = AuthSwitcher::MFA;
+                    return $result;
+                }
+            }
         }
-        if ($active !== null && $active >= 0) {
-            $result[] = AuthSwitcher::MFA;
+        if (empty($state['Attributes']['mfaEnforced'])) {
+            $result[] = AuthSwitcher::SFA;
         }
         return $result;
     }
 
-    private function getActiveMethod($uid)
-    {
-        return $this->db->read('SELECT method FROM ' . $this->mfa_table
-            . ' WHERE ' . self::UID_COL . ' = :uid ORDER BY priority ASC', ['uid' => $uid])
-            ->fetchColumn();
+    private function getActiveMethod($state) {
+        $result = [];
+        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
+            foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+                $token = json_decode($mfaToken, true);
+                if ($token["revoked"] === false && $token["type"] === self::TOTP) {
+                    $result[] = self::TOTP_TOTP;
+                } elseif ($token["revoked"] === false && $token["type"] === self::WEBAUTHN) {
+                    $result[] = self::WEBAUTHN_WEBAUTHN;
+                }
+            }
+        }
+        $result = array_unique($result);
+        $detect = new MobileDetect;
+        $totpPref = $detect->isMobile();
+        if ($result == []) {
+            return null;
+        }
+        if ($totpPref && in_array(self::TOTP_TOTP, $result) && in_array(self::WEBAUTHN_WEBAUTHN, $result)) {
+            return self::TOTP_TOTP;
+        } elseif (!$totpPref && in_array(self::TOTP_TOTP, $result) && in_array(self::WEBAUTHN_WEBAUTHN, $result)) {
+            return self::WEBAUTHN_WEBAUTHN;
+        } else {
+            return $result[0];
+        }
     }
 
     /**
      * Perform the appropriate MFA.
+     * @param $state
      */
-    private function performMFA(&$state, $uid)
+    private function performMFA(&$state)
     {
-        $method = $this->getActiveMethod($uid);
+        $method = $this->getActiveMethod($state);
 
         if (empty($method)) {
             throw new Exception(self::DEBUG_PREFIX
