@@ -2,11 +2,16 @@
 
 namespace SimpleSAML\Module\authswitcher;
 
-/** Methods not specific to this module. */
+/**
+ * Methods not specific to this module.
+ */
 class Utils
 {
-    /** Execute an auth proc filter.
-     * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php */
+    /**
+     * Execute an auth proc filter.
+     *
+     * @see https://github.com/CESNET/perun-simplesamlphp-module/blob/master/lib/Auth/Process/ProxyFilter.php
+     */
     public static function runAuthProcFilter($nestedClass, array $config, &$state, $reserved)
     {
         list($module, $simpleClass) = explode(':', $nestedClass);
@@ -20,7 +25,7 @@ class Utils
         $invalidModules = [];
         foreach ($filters as $filter) {
             list($module) = explode(':', $filter);
-            if (!\SimpleSAML\Module::isModuleEnabled($module)) {
+            if (! \SimpleSAML\Module::isModuleEnabled($module)) {
                 $invalidModules[] = $module;
             }
         }

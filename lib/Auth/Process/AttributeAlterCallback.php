@@ -17,42 +17,49 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
 {
     /**
      * Should the pattern found be replaced?
+     *
      * @var bool
      */
     private $replace = false;
 
     /**
      * Should the value found be removed?
+     *
      * @var bool
      */
     private $remove = false;
 
     /**
      * Pattern to search for.
+     *
      * @var string
      */
     private $pattern = '';
 
     /**
      * String to replace the pattern found with.
+     *
      * @var string|false
      */
     private $replacement = false;
 
     /**
      * Attribute to search in
+     *
      * @var string
      */
     private $subject = '';
 
     /**
      * Attribute to place the result in.
+     *
      * @var string
      */
     private $target = '';
 
     /**
      * Callback to call on subject
+     *
      * @var callable
      */
     private $callback = null;
@@ -60,7 +67,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
     /**
      * Initialize this filter.
      *
-     * @param array &$config  Configuration information about this filter.
+     * @param array $config  Configuration information about this filter.
      * @param mixed $reserved  For future use.
      * @throws \SimpleSAML\Error\Exception In case of invalid configuration.
      */
@@ -83,21 +90,16 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
                 }
                 continue;
             } elseif ($name === 'pattern') {
-                // Set pattern
                 $this->pattern = $value;
             } elseif ($name === 'replacement') {
-                // Set replacement
                 $this->replacement = $value;
             } elseif ($name === 'subject') {
-                // Set subject
                 $this->subject = $value;
             } elseif ($name === 'target') {
-                // Set target
                 $this->target = $value;
             } elseif ($name === 'callback') {
-                // Set callback
                 $this->callback = $value;
-                if (!is_callable($this->callback)) {
+                if (! is_callable($this->callback)) {
                     throw new Error\Exception('Callback is not callable.');
                 }
             }
@@ -109,7 +111,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
      *
      * Modify existing attributes with the configured values.
      *
-     * @param array &$request The current request.
+     * @param array $request The current request.
      * @throws \SimpleSAML\Error\Exception In case of invalid configuration.
      */
     public function process(&$request)
@@ -125,13 +127,13 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
             throw new Error\Exception('Not all params set in config.');
         }
 
-        if (!$this->replace && !$this->remove && $this->replacement === false && $this->callback === null) {
+        if (! $this->replace && ! $this->remove && $this->replacement === false && $this->callback === null) {
             throw new Error\Exception(
                 "'replacement' or 'callback' must be set if neither '%replace' nor " . "'%remove' are set."
             );
         }
 
-        if (!$this->replace && $this->replacement === null) {
+        if (! $this->replace && $this->replacement === null) {
             throw new Error\Exception("'%replace' must be set if 'replacement' is null.");
         }
 
@@ -140,9 +142,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
         }
 
         if ($this->replacement !== false && $this->callback !== null) {
-            throw new Error\Exception(
-                "'replacement' and 'callback' cannot be used together."
-            );
+            throw new Error\Exception("'replacement' and 'callback' cannot be used together.");
         }
 
         if (empty($this->target)) {
@@ -154,7 +154,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
             throw new Error\Exception("Cannot use '%remove' when 'target' is different than 'subject'.");
         }
 
-        if (!array_key_exists($this->subject, $attributes)) {
+        if (! array_key_exists($this->subject, $attributes)) {
             // if no such subject, stop gracefully
             return;
         }
@@ -204,11 +204,7 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
             } else {
                 /** @psalm-suppress InvalidArgument */
                 $attributes[$this->target] = array_diff(
-                    preg_replace(
-                        $this->pattern,
-                        $this->replacement,
-                        $attributes[$this->subject]
-                    ),
+                    preg_replace($this->pattern, $this->replacement, $attributes[$this->subject]),
                     $attributes[$this->subject]
                 );
             }

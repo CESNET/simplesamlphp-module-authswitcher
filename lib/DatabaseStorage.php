@@ -28,7 +28,11 @@ class DatabaseStorage implements Storage
         $this->db->write(
             'INSERT INTO AttributeFromSQLUnique (uid,attribute,value) '
             . 'VALUES (:uid,:attribute,:value)',
-            ['uid' => $userId, 'attribute' => 'totp_secret', 'value' => $secret]
+            [
+                'uid' => $userId,
+                'attribute' => 'totp_secret',
+                'value' => $secret,
+            ]
         );
     }
 }

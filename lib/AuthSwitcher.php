@@ -2,28 +2,41 @@
 
 namespace SimpleSAML\Module\authswitcher;
 
-/** Module-wide constants. */
+/**
+ * Module-wide constants.
+ */
 class AuthSwitcher
 {
     /**
      * Name of the uid attribute.
+     *
      * @todo make configurable
      */
     public const UID_ATTR = 'eduPersonPrincipalName';
 
-    /** Name of the MFA being performed attribute. */
+    /**
+     * Name of the MFA being performed attribute.
+     */
     public const MFA_BEING_PERFORMED = 'mfa_being_performed';
 
-    /** REFEDS profile for SFA */
+    /**
+     * REFEDS profile for SFA
+     */
     public const SFA = 'https://refeds.org/profile/sfa';
 
-    /** REFEDS profile for MFA */
+    /**
+     * REFEDS profile for MFA
+     */
     public const MFA = 'https://refeds.org/profile/mfa';
 
-    /** Password AuthnContext */
+    /**
+     * Password AuthnContext
+     */
     public const PASS = 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport';
 
-    /** Supported AuthnContexts (pass <= sfa < mfa) */
+    /**
+     * Supported AuthnContexts (pass <= sfa < mfa)
+     */
     public const SUPPORTED = [self::PASS, self::SFA, self::MFA];
 
     public const SAML2_STATUS_RESPONDER = 'urn:oasis:names:tc:SAML:2.0:status:Responder';

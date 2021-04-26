@@ -73,6 +73,7 @@ Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 IMPORTANT: The modules MUST enforce 2FA. Also, the modules have to handle multiple tokens if desired.
 
 Copy the file `modules/authswitcher/config-templates/module_authswitcher.php` to `config/module_authswitcher.php` and adjust its contents:
+
 ```bash
 cp modules/authswitcher/config-templates/module_authswitcher.php config/module_authswitcher.php
 nano config/module_authswitcher.php
@@ -92,7 +93,7 @@ $config = [
 The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
 Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa. To add more, you have to write [custom AuthFilterMethod](#custom-authfiltermethod)s.
 
-Note: Do *NOT* add separate filters for the authentication methods that are controlled by authswitcher.
+Note: Do _NOT_ add separate filters for the authentication methods that are controlled by authswitcher.
 
 ## Perun integration
 
@@ -127,6 +128,7 @@ class MyDataAdapter implements \SimpleSAML\Module\authswitcher\DataAdapter {
 ```
 
 If you make this class available (loaded), you can then setup authswitcher to use it (in `config/module_authswitcher.php`):
+
 ```php
 <?php
 /**
@@ -142,6 +144,7 @@ $config = [
 
 If you want to add a new MFA method, create a class whose name is in the form `\SimpleSAML\Module\authswitcher\*Modulenamefiltername*` and it extends [\SimpleSAML\Module\authswitcher\AuthFilterMethod](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/AuthFilterMethod.php).
 For example for a filter named `bar` of a module named `foo`:
+
 ```php
 class \SimpleSAML\Module\authswitcher\Foobar extends \SimpleSAML\Module\authswitcher\AuthFilterMethod {
     /* ... */
@@ -149,6 +152,5 @@ class \SimpleSAML\Module\authswitcher\Foobar extends \SimpleSAML\Module\authswit
 ```
 
 Then configure authswitcher to use filter `foo:bar` and this class will be used.
-
 
 © 2017-2019 CSIRT-MU

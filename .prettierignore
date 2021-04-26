@@ -5,3 +5,4 @@ CHANGELOG.md
 renovate.json
 vendor/
 composer.lock
+ecs.yaml

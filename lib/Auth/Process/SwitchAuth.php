@@ -2,15 +2,14 @@
 
 namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
+use Detection\MobileDetect;
 use SimpleSAML\Auth\State;
 use SimpleSAML\Configuration;
-use SimpleSAML\Database;
 use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
 use SimpleSAML\Module\authswitcher\Utils;
 use SimpleSAML\Module\saml\Error\NoAuthnContext;
-use Detection\MobileDetect;
 
 class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 {
@@ -29,13 +28,19 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     /* configurable attributes */
 
-    /** Associative array with keys of the form 'module:filter', values are config arrays to be passed to filters. */
+    /**
+     * Associative array with keys of the form 'module:filter', values are config arrays to be passed to filters.
+     */
     private $configs = [];
 
-    /** Second constructor parameter */
+    /**
+     * Second constructor parameter
+     */
     private $reserved;
 
-    /** State with exception handler set. */
+    /**
+     * State with exception handler set.
+     */
     private $errorState;
 
     private $userCanSFA;
@@ -48,7 +53,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private $config;
 
-    /** @override */
+    /**
+     * @override
+     */
     public function __construct($config, $reserved)
     {
         parent::__construct($config, $reserved);
@@ -57,7 +64,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $this->reserved = $reserved;
     }
 
-    /** @override */
+    /**
+     * @override
+     */
     public function process(&$state)
     {
         $this->getConfig($this->config);
@@ -67,10 +76,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         // MFA requested => perform MFA and return MFA
 
         $usersCapabilities = $this->getMFAForUid($state);
-        assert(!empty($usersCapabilities));
+        assert(! empty($usersCapabilities));
         $this->userCanSFA = self::SFAin($usersCapabilities);
         $this->userCanMFA = self::MFAin($usersCapabilities);
-        $performMFA = !$this->userCanSFA;
+        $performMFA = ! $this->userCanSFA;
         // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
         // i.e. when possible, SFA is prefered
 
@@ -90,19 +99,14 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 AuthSwitcher::SUPPORTED
             );
 
-            if (!empty($requestedContexts) && empty($supportedRequestedContexts)) {
-                State::throwException(
-                    $this->errorState,
-                    new NoAuthnContext(
-                        AuthSwitcher::SAML2_STATUS_REQUESTER
-                    )
-                );
+            if (! empty($requestedContexts) && empty($supportedRequestedContexts)) {
+                State::throwException($this->errorState, new NoAuthnContext(AuthSwitcher::SAML2_STATUS_REQUESTER));
                 exit;
             }
 
             $this->requestedSFA = self::SFAin($supportedRequestedContexts);
             $this->requestedMFA = self::MFAin($supportedRequestedContexts);
-            if (!empty($supportedRequestedContexts)) {
+            if (! empty($supportedRequestedContexts)) {
                 // check for unsatisfiable combinations
                 $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
                 // switch to MFA if prefered
@@ -118,7 +122,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     /* logging */
 
-    /** Log a warning.
+    /**
+     * Log a warning.
+     *
      * @param $message
      */
     private function warning($message)
@@ -126,12 +132,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         Logger::warning(self::DEBUG_PREFIX . $message);
     }
 
-    /** Get configuration parameters from the config array.
-     * @param array $config
+    /**
+     * Get configuration parameters from the config array.
      */
     private function getConfig(array $config)
     {
-        if (!is_array($config['configs'])) {
+        if (! is_array($config['configs'])) {
             throw new Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
         $filterModules = array_keys($config['configs']);
@@ -155,50 +161,47 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     }
 
     /**
-     * If the Comparison attribute is set to “better”, “minimum”, or “maximum”,
-     * the method of authentication must be stronger than, at least as strong as,
-     * or no stronger than one of the specified authentication classes.
+     * If the Comparison attribute is set to “better”, “minimum”, or “maximum”, the method of authentication
+     * must be stronger than, at least as strong as, or no stronger than one of the specified authentication classes.
+     *
      * @throws NoAuthnContext
      */
     private function testAuthnContextComparison($comparison)
     {
         switch ($comparison) {
             case 'better':
-                if (!$this->userCanMFA || !$this->requestedSFA) {
+                if (! $this->userCanMFA || ! $this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
                 break;
             case 'minimum':
-                if (!$this->userCanMFA && $this->requestedMFA) {
+                if (! $this->userCanMFA && $this->requestedMFA) {
                     $this->noAuthnContextResponder();
                 }
                 break;
             case 'maximum':
-                if (!$this->userCanSFA && $this->requestedSFA) {
+                if (! $this->userCanSFA && $this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
                 break;
             case 'exact':
             default:
-                if (!$this->userCanMFA && !$this->requestedSFA) {
+                if (! $this->userCanMFA && ! $this->requestedSFA) {
                     $this->noAuthnContextResponder();
                 }
-                if (!$this->userCanSFA && !$this->requestedMFA) {
+                if (! $this->userCanSFA && ! $this->requestedMFA) {
                     $this->noAuthnContextResponder();
                 }
                 break;
         }
     }
 
-    /** @throws NoAuthnContext */
+    /**
+     * @throws NoAuthnContext
+     */
     private function noAuthnContextResponder()
     {
-        State::throwException(
-            $this->errorState,
-            new NoAuthnContext(
-                AuthSwitcher::SAML2_STATUS_RESPONDER
-            )
-        );
+        State::throwException($this->errorState, new NoAuthnContext(AuthSwitcher::SAML2_STATUS_RESPONDER));
         exit;
     }
 
@@ -211,10 +214,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private function getMFAForUid($state)
     {
         $result = [];
-        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
+        if (! empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 $token = json_decode($mfaToken, true);
-                if ($token["revoked"] === false) {
+                if ($token['revoked'] === false) {
                     $result[] = AuthSwitcher::MFA;
                     return $result;
                 }
@@ -226,35 +229,39 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         return $result;
     }
 
-    private function getActiveMethod($state) {
+    private function getActiveMethod($state)
+    {
         $result = [];
-        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
+        if (! empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 $token = json_decode($mfaToken, true);
-                if ($token["revoked"] === false && $token["type"] === self::TOTP) {
+                if ($token['revoked'] === false && $token['type'] === self::TOTP) {
                     $result[] = self::TOTP_TOTP;
-                } elseif ($token["revoked"] === false && $token["type"] === self::WEBAUTHN) {
+                } elseif ($token['revoked'] === false && $token['type'] === self::WEBAUTHN) {
                     $result[] = self::WEBAUTHN_WEBAUTHN;
                 }
             }
         }
         $result = array_unique($result);
-        $detect = new MobileDetect;
+        $detect = new MobileDetect();
         $totpPref = $detect->isMobile();
-        if ($result == []) {
+        if ($result === []) {
             return null;
         }
-        if ($totpPref && in_array(self::TOTP_TOTP, $result) && in_array(self::WEBAUTHN_WEBAUTHN, $result)) {
+        if ($totpPref && in_array(self::TOTP_TOTP, $result, true) && in_array(self::WEBAUTHN_WEBAUTHN, $result, true)) {
             return self::TOTP_TOTP;
-        } elseif (!$totpPref && in_array(self::TOTP_TOTP, $result) && in_array(self::WEBAUTHN_WEBAUTHN, $result)) {
+        } elseif (
+            ! $totpPref
+            && in_array(self::TOTP_TOTP, $result, true) && in_array(self::WEBAUTHN_WEBAUTHN, $result, true)
+        ) {
             return self::WEBAUTHN_WEBAUTHN;
-        } else {
-            return $result[0];
         }
+            return $result[0];
     }
 
     /**
      * Perform the appropriate MFA.
+     *
      * @param $state
      */
     private function performMFA(&$state)
@@ -266,19 +273,13 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 . 'Inconsistent data - no MFA methods for a user who should be able to do MFA.');
         }
 
-        if (!isset($this->configs[$method])) {
-            throw new Exception(self::DEBUG_PREFIX
-                . 'Configuration for ' . $method . ' is missing.');
+        if (! isset($this->configs[$method])) {
+            throw new Exception(self::DEBUG_PREFIX . 'Configuration for ' . $method . ' is missing.');
         }
 
-        if (!isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
+        if (! isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
             $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
         }
-        Utils::runAuthProcFilter(
-            $method,
-            $this->configs[$method],
-            $state,
-            $this->reserved
-        );
+        Utils::runAuthProcFilter($method, $this->configs[$method], $state, $this->reserved);
     }
 }
