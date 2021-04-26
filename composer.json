@@ -12,11 +12,10 @@
     "php": ">=7.1.0",
     "web-token/jwt-easy": "^2.2",
     "simplesamlphp/composer-module-installer": "~1.0",
-    "simplesamlphp/simplesamlphp": "^1.17.2",
     "ext-json": "*",
     "mobiledetect/mobiledetectlib": "^2.8"
   },
   "require-dev": {
-    "symplify/easy-coding-standard": "^7.2"
+    "symplify/easy-coding-standard": "^9.2"
   }
 }

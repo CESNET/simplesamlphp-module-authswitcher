@@ -1,0 +1,7 @@
+node_modules
+.git
+package-lock.json
+CHANGELOG.md
+renovate.json
+vendor/
+composer.lock

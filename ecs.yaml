@@ -1,9 +1,0 @@
-imports:
-    - { resource: 'vendor/symplify/easy-coding-standard/config/set/clean-code.yaml' }
-    - { resource: 'vendor/symplify/easy-coding-standard/config/set/common.yaml' }
-parameters:
-    skip:
-        PhpCsFixer\Fixer\Operator\NotOperatorWithSuccessorSpaceFixer: ~
-        SlevomatCodingStandard\Sniffs\Variables\UnusedVariableSniff.UnusedVariable:
-          - 'config-templates/module_authswitcher.php'
-services:

@@ -1,0 +1,41 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Dependency-Scanning.gitlab-ci.yml
+
+lintphp:
+  image: php:7.4
+  stage: test
+  tags:
+    - idmuni
+  before_script:
+    - apt-get update -yqq
+    - apt-get install git unzip -yqq
+    - php -r "copy('https://composer.github.io/installer.sig', 'installer.sig');"
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php -r "if (hash_file('SHA384', 'composer-setup.php') === file_get_contents('installer.sig')) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php'); unlink('installer.sig');"
+    - php composer.phar install
+  script:
+    - vendor/bin/ecs check
+    - vendor/bin/phpcs --standard=PSR12 -q --extensions=php --encoding=utf8 ecs.php config-templates lib
+
+prettier:
+  image: node:14-buster
+  stage: test
+  before_script:
+    - npm ci
+  script:
+    - npx prettier --check .
+
+publish:
+  image: node:14-buster
+  stage: deploy
+  before_script:
+    - npm ci
+  script:
+    - npx semantic-release
+  only:
+    - main
