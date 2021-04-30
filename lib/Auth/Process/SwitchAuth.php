@@ -4,7 +4,6 @@ namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
 use Detection\MobileDetect;
 use SimpleSAML\Auth\State;
-use SimpleSAML\Configuration;
 use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
