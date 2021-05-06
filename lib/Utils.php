@@ -2,6 +2,8 @@
 
 namespace SimpleSAML\Module\authswitcher;
 
+use SimpleSAML\Error\Exception;
+
 /**
  * Methods not specific to this module.
  */
@@ -33,5 +35,12 @@ class Utils
             return $invalidModules;
         }
         return true;
+    }
+
+    public static function checkVariableInStateAttributes($state, $variable)
+    {
+        if (! isset($state['Attributes'][$variable])) {
+            throw new Exception('authswitcher:SwitchMfaMethods: ' . $variable . ' missing in state attributes');
+        }
     }
 }
