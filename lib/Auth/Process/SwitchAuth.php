@@ -228,7 +228,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         return $result;
     }
 
-    private function getActiveMethod($state)
+    private function getActiveMethod(&$state)
     {
         $result = [];
         if (! empty($state['Attributes'][self::MFA_TOKENS])) {
@@ -247,6 +247,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if ($result === []) {
             return null;
         }
+        $state['Attributes']['MFA_METHODS'] = $result;
         if ($totpPref && in_array(self::TOTP_TOTP, $result, true) && in_array(self::WEBAUTHN_WEBAUTHN, $result, true)) {
             return self::TOTP_TOTP;
         } elseif (
@@ -255,7 +256,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         ) {
             return self::WEBAUTHN_WEBAUTHN;
         }
-            return $result[0];
+        return $result[0];
     }
 
     /**
@@ -279,6 +280,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (! isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
             $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
         }
+        $state['Attributes']['Config'] = json_encode($this->configs);
+        if ($this->reserved === null) {
+            $this->reserved = '';
+        }
+        $state['Attributes']['Reserved'] = $this->reserved;
+        $state['Attributes']['MFA_FILTER_INDEX'] = array_search($method, $state['Attributes']['MFA_METHODS'], true);
         Utils::runAuthProcFilter($method, $this->configs[$method], $state, $this->reserved);
     }
 }

@@ -8,10 +8,11 @@ namespace SimpleSAML\Module\authswitcher;
 
 use Jose\Component\Core\JWKSet;
 use Jose\Easy\Build;
+use SimpleSAML\Configuration;
 
 class PerunStorage extends DatabaseStorage
 {
-    private const CONFIG_FILE = 'module_authswitcher.php';
+    protected const CONFIG_FILE = 'module_authswitcher.php';
 
     public function __construct()
     {
