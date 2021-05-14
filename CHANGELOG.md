@@ -1,3 +1,11 @@
+# [4.1.0](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/compare/v4.0.0...v4.1.0) (2021-05-14)
+
+
+### Features
+
+* added switching between multiple authentication methods ([c3de9c0](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/commit/c3de9c05ddd6d4f5cdbaed828adf40e23b79e705))
+* userid_attribute removed ([3672b0a](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/commit/3672b0a8f04f09a22c6d21414f6099e02617d17d)), closes [#1](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/issues/1)
+
 # [4.0.0](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/compare/v3.4.3...v4.0.0) (2021-04-27)
 
 
@@ -69,6 +77,3 @@
 
 
 # 2.0.0 (2019-12-03)
-
-
-
