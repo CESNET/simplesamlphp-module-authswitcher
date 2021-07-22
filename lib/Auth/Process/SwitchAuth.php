@@ -218,7 +218,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 $token = json_decode($mfaToken, true);
                 if ($token['revoked'] === false) {
                     $result[] = AuthSwitcher::MFA;
-                    return $result;
+                    break;
                 }
             }
         }
