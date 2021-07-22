@@ -5,10 +5,10 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
 
 lintphp:
-  image: php:7.4
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:7.4
   stage: test
   tags:
-    - idmuni
+    - idmunisimple
   before_script:
     - apt-get update -yqq
     - apt-get install git unzip -yqq
@@ -23,16 +23,20 @@ lintphp:
     - vendor/bin/phpcs --standard=PSR12 -q --extensions=php --encoding=utf8 ecs.php config-templates lib
 
 prettier:
-  image: node:14-buster
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:14-buster
   stage: test
+  tags:
+    - idmunisimple
   before_script:
     - npm ci
   script:
     - npx prettier --check .
 
 publish:
-  image: node:14-buster
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:14-buster
   stage: deploy
+  tags:
+    - idmunisimple
   before_script:
     - npm ci
   script:
