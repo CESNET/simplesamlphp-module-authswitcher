@@ -1,3 +1,10 @@
+## [4.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.0...v4.1.1) (2021-07-22)
+
+
+### Bug Fixes
+
+* allow SFA for users with MFA tokens without MFA enforced ([ff928dd](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/ff928ddc6a1ddf76788e26b3ec11a365c68ceb9a))
+
 # [4.1.0](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/compare/v4.0.0...v4.1.0) (2021-05-14)
 
 
