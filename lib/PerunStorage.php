@@ -9,6 +9,7 @@ namespace SimpleSAML\Module\authswitcher;
 use Jose\Component\Core\JWKSet;
 use Jose\Easy\Build;
 use SimpleSAML\Configuration;
+use SimpleSAML\Logger;
 
 class PerunStorage extends DatabaseStorage
 {
@@ -61,7 +62,8 @@ class PerunStorage extends DatabaseStorage
             ]
         );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_exec($ch);
+        $response = curl_exec($ch);
+        Logger::info(sprintf("Response from MFA API: %s", $response));
         curl_close($ch);
     }
 }
