@@ -1,3 +1,10 @@
+## [4.1.2](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.1...v4.1.2) (2021-07-23)
+
+
+### Bug Fixes
+
+* add logging of MFA API response ([bce33e4](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/bce33e4dc0a59efa6b2e606738ff0e4fca0434cb))
+
 ## [4.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.0...v4.1.1) (2021-07-22)
 
 
