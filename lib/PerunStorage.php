@@ -63,7 +63,7 @@ class PerunStorage extends DatabaseStorage
         );
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-        Logger::info(sprintf("Response from MFA API: %s", $response));
+        Logger::info(sprintf('Response from MFA API: %s', $response));
         curl_close($ch);
     }
 }
