@@ -1,3 +1,11 @@
+## [4.1.3](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.2...v4.1.3) (2021-08-04)
+
+
+### Bug Fixes
+
+* correct WebAuthn token type case ([9b65ea4](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/9b65ea43b608bfd75250edbe6b28185edcc7183d))
+* remove indexes from MFA_METHODS ([b1980bd](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/b1980bdc33de1786f1bd34dd947be48900f33287))
+
 ## [4.1.2](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.1...v4.1.2) (2021-07-23)
 
 
