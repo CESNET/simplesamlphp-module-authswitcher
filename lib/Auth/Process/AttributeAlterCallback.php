@@ -67,8 +67,8 @@ class AttributeAlterCallback extends \SimpleSAML\Auth\ProcessingFilter
     /**
      * Initialize this filter.
      *
-     * @param array $config  Configuration information about this filter.
-     * @param mixed $reserved  For future use.
+     * @param array $config Configuration information about this filter.
+     * @param mixed $reserved For future use.
      * @throws \SimpleSAML\Error\Exception In case of invalid configuration.
      */
     public function __construct(&$config, $reserved)

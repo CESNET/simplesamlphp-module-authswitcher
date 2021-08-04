@@ -1,10 +1,6 @@
 # SimpleSAMLPHP module authswitcher
 
-Module for toggling [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) on a per-user basis (e.g. [YubiKey](https://github.com/simplesamlphp/simplesamlphp-module-yubikey) or [TOTP](https://github.com/aidan-/SimpleTOTP)).
-
-Example: One user only authenticates with username and password, second uses password and YubiKey and third user logs in with password and TOTP.
-
-The settings are retrieved using `\SimpleSAML\Database`.
+Module for toggling [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc).
 
 The module was tested on a Debian 9 server with PHP 7.4 and SSP 1.18.3.
 
@@ -21,29 +17,24 @@ The modules that are going to be controlled by authswitcher need to be installed
 Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 
 ```php
-50 => [
+54 => [
     'class' => 'authswitcher:SwitchAuth',
-    'configs' => [
-        'yubikey:OTP' => [
-            'api_client_id' => '12345', // change to your API client ID
-            'api_key' => 'abcdefghchijklmnopqrstuvwxyz', // change to your API key
-            'key_id_attribute' => 'yubikey',
-            'abort_if_missing' => true,
-            'assurance_attribute' => 'yubikeyAssurance',
-        ],
-        'simpletotp:2fa' => [
-            'secret_attr' => 'totp_secret',
-            'enforce_2fa' => true,
+        'configs' => [
+            'totp:Totp' => [
+                'secret_attr' => 'totp_secret',
+                'enforce_2fa' => true,
+                'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
+            ],
+            'webauthn:WebAuthn' => [
+                'redirect_url' => 'https://id.muni.cz/webauthn/authentication_request',
+                'api_url' => 'https://id.muni.cz/webauthn/request',
+                'signing_key' => 'webauthn_private.pem',
+                'user_id' => 'uniqueId',
+                'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
+            ],
         ],
     ],
-],
 // as a safety precausion, remove the "secret" attributes
-52 => [
-    'class' => 'core:AttributeAlter',
-    'subject' => 'yubikey',
-    'pattern' => '/.*/',
-    '%remove',
-],
 53 => [
     'class' => 'core:AttributeAlter',
     'subject' => 'totp_secret',
@@ -70,75 +61,12 @@ Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 
 ```
 
-IMPORTANT: The modules MUST enforce 2FA. Also, the modules have to handle multiple tokens if desired.
+If Attributes array contains at least one mfaToken which is not revoked and mfaEnforce attribute is set or mfa is preferred by SP, SwitchAuth proc filter runs [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) or
+[TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) proc filter, decided by type of mfaToken. If both token types are available, proc filter is decided by type of running device (TOTP for mobile devices, WebAuthn for desktops and laptops).
 
-Copy the file `modules/authswitcher/config-templates/module_authswitcher.php` to `config/module_authswitcher.php` and adjust its contents:
-
-```bash
-cp modules/authswitcher/config-templates/module_authswitcher.php config/module_authswitcher.php
-nano config/module_authswitcher.php
-```
-
-```php
-<?php
-/**
- * This file is part of the authswitcher module.
- */
-
-$config = [
-    'dataAdapter' => '', // adjust
-];
-```
-
-The authapi module provides a `DataAdapter` implementation which connects to an SQL database. You can also write your [custom DataAdapter](#custom-dataadapter).
-Authswitcher includes out-of-the-box support for yubikey:OTP and simpletotp:2fa. To add more, you have to write [custom AuthFilterMethod](#custom-authfiltermethod)s.
-
-Note: Do _NOT_ add separate filters for the authentication methods that are controlled by authswitcher.
-
-## Perun integration
-
-In order to use PerunStorage and sync tokens with Perun, you have to add configuration options to `module-authswitcher.php`:
-
-```
-$config = [
-  // ...
-  'PerunStorage' => [
-    'apiURL' => 'https://id.muni.cz/mfaapi/token',
-    'OIDCKeyStore' => '/var/oidc-keystore.jwks',
-    //'OIDCKeyId' => 'rsa1',
-    //'OIDCTokenTimeout' => 300,
-    //'OIDCTokenAlg' => 'RS256',
-    'OIDCIssuer' => 'https://oidc.muni.cz/oidc/',
-    'OIDCClientId' => 'd574aeba-b2d0-4234-bcf0-53ec30b17ba4',
-  ],
-  //...
-];
-```
+It is possible to redirect from [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) to switchMfaMethods script, which checks authentication result and if result is negative, it runs next proc filter if available.
 
 ## Extend this module
-
-### Custom DataAdapter
-
-You can write our own implementation of the [\SimpleSAML\Module\authswitcher\DataAdapter](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/DataAdapter.php) interface:
-
-```php
-class MyDataAdapter implements \SimpleSAML\Module\authswitcher\DataAdapter {
-    /* ... */
-}
-```
-
-If you make this class available (loaded), you can then setup authswitcher to use it (in `config/module_authswitcher.php`):
-
-```php
-<?php
-/**
- * This file is part of the authswitcher module.
- */
-
-$config = [
-    'dataAdapter' => 'MyDataAdapter',
-];
-```
 
 ### Custom AuthFilterMethod
 

@@ -6,17 +6,14 @@
  * this script switch between mfa methods and perform defined method
  */
 
-use SimpleSAML\Auth\State;
-use SimpleSAML\Module\authswitcher\Utils;
-use SimpleSAML\Error\BadRequest;
-use SimpleSAML\Utils\HTTP;
 use SimpleSAML\Auth\ProcessingChain;
+use SimpleSAML\Auth\State;
+use SimpleSAML\Error\BadRequest;
+use SimpleSAML\Module\authswitcher\Utils;
+use SimpleSAML\Utils\HTTP;
 
-
-if (!isset($_REQUEST['StateId'])) {
-    throw new BadRequest(
-        'Missing required StateId or Module query parameter.'
-    );
+if (! isset($_REQUEST['StateId'])) {
+    throw new BadRequest('Missing required StateId or Module query parameter.');
 }
 
 $id = $_REQUEST['StateId'];
@@ -26,7 +23,7 @@ if ($sid['url'] !== null) {
     HTTP::checkURLAllowed($sid['url']);
 }
 
-$state = State::loadState($id,   'authSwitcher:request');
+$state = State::loadState($id, 'authSwitcher:request');
 Utils::checkVariableInStateAttributes($state, 'MFA_RESULT');
 Utils::checkVariableInStateAttributes($state, 'Config');
 Utils::checkVariableInStateAttributes($state, 'Reserved');
