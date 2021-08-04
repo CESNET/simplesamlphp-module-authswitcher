@@ -19,7 +19,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private const TOTP = 'TOTP';
 
-    private const WEBAUTHN = 'webauthn';
+    private const WEBAUTHN = 'WebAuthn';
 
     private const WEBAUTHN_WEBAUTHN = 'webauthn:WebAuthn';
 
