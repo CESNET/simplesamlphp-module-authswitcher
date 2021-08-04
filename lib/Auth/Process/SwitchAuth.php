@@ -241,7 +241,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
             }
         }
-        $result = array_unique($result);
+        $result = array_values(array_unique($result));
         $detect = new MobileDetect();
         $totpPref = $detect->isMobile();
         if ($result === []) {
