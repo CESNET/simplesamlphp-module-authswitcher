@@ -1,3 +1,15 @@
+# [5.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.3...v5.0.0) (2021-08-18)
+
+
+### Features
+
+* move storage classes to TOTP module ([f933dc5](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/f933dc503d043cffedb9b98edc8ffa7796fe98fe))
+
+
+### BREAKING CHANGES
+
+* removed DatabaseStorage, removed PerunStorage, removed module_authswitcher.php
+
 ## [4.1.3](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.2...v4.1.3) (2021-08-04)
 
 
