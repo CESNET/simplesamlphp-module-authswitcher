@@ -4,6 +4,18 @@ include:
   - template: Security/License-Scanning.gitlab-ci.yml
   - template: Dependency-Scanning.gitlab-ci.yml
 
+cache:
+  - key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  - key:
+      files:
+        - composer.lock
+    paths:
+      - vendor/
+
 lintphp:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:7.4
   stage: test
@@ -22,13 +34,17 @@ lintphp:
     - vendor/bin/ecs check
     - vendor/bin/phpcs --standard=PSR12 -q --extensions=php --encoding=utf8 ecs.php www lib
 
+.npm:
+  before_script:
+    - npm ci --cache .npm --prefer-offline
+
 prettier:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:14-buster
   stage: test
   tags:
     - idmunisimple
-  before_script:
-    - npm ci
+  extends:
+    - .npm
   script:
     - npx prettier --check .
 
@@ -37,8 +53,8 @@ publish:
   stage: deploy
   tags:
     - idmunisimple
-  before_script:
-    - npm ci
+  extends:
+    - .npm
   script:
     - npx semantic-release
   only:
