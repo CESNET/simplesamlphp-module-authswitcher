@@ -20,7 +20,7 @@ lintphp:
     - php composer.phar install
   script:
     - vendor/bin/ecs check
-    - vendor/bin/phpcs --standard=PSR12 -q --extensions=php --encoding=utf8 ecs.php config-templates lib
+    - vendor/bin/phpcs --standard=PSR12 -q --extensions=php --encoding=utf8 ecs.php www lib
 
 prettier:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:14-buster
