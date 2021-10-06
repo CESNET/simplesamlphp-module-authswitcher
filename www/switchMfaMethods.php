@@ -9,6 +9,7 @@
 use SimpleSAML\Auth\ProcessingChain;
 use SimpleSAML\Auth\State;
 use SimpleSAML\Error\BadRequest;
+use SimpleSAML\Module\authswitcher\Auth\Process\SwitchAuth;
 use SimpleSAML\Module\authswitcher\Utils;
 use SimpleSAML\Utils\HTTP;
 
@@ -33,6 +34,7 @@ $config = json_decode($state['Attributes']['Config'], true);
 $mfaResult = $state['Attributes']['MFA_RESULT'];
 $mfaFilterIndex = $state['Attributes']['MFA_FILTER_INDEX'];
 if ($state['Attributes']['MFA_RESULT'] === 'Authenticated') {
+    SwitchAuth::setAuthnContext($state);
     ProcessingChain::resumeProcessing($state);
 } else {
     if (count($state['Attributes']['MFA_METHODS']) - 1 === $mfaFilterIndex) {

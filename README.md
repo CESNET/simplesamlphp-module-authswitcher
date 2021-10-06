@@ -1,6 +1,6 @@
 # SimpleSAMLPHP module authswitcher
 
-Module for toggling [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc).
+Module for toggling [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) and honoring + setting `AuthnContextClassRef`.
 
 The module was tested on a Debian 9 server with PHP 7.4 and SSP 1.18.3.
 
@@ -41,24 +41,6 @@ Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
     'pattern' => '/.*/',
     '%remove',
 ],
-// REFEDS
-55 => [
-    'class' => 'core:AttributeAdd',
-    'eduPersonAssurance' => [
-        'https://refeds.org/assurance',
-        'https://refeds.org/assurance/ID/unique',
-        'https://refeds.org/assurance/ID/eppn-unique-no-reassign',
-        'https://refeds.org/assurance/IAP/local-enterprise',
-        'https://refeds.org/assurance/ATP/ePA-1m',
-        'https://refeds.org/assurance/ATP/ePA-1d',
-        'https://refeds.org/assurance/IAP/low',
-        'https://refeds.org/assurance/IAP/medium',
-    ],
-],
-60 => [
-    'class' => 'authswitcher:Refeds',
-],
-
 ```
 
 If Attributes array contains at least one mfaToken which is not revoked and mfaEnforce attribute is set or mfa is preferred by SP, SwitchAuth proc filter runs [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) or
@@ -81,4 +63,4 @@ class \SimpleSAML\Module\authswitcher\Foobar extends \SimpleSAML\Module\authswit
 
 Then configure authswitcher to use filter `foo:bar` and this class will be used.
 
-© 2017-2019 CSIRT-MU
+© 2017-2021 CSIRT-MU
