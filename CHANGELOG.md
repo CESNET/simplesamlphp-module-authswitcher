@@ -1,3 +1,15 @@
+# [6.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v5.0.0...v6.0.0) (2021-10-06)
+
+
+### Bug Fixes
+
+* reply with one of requested AuthnContextClassRefs ([43cb294](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/43cb294ec23ea799c7dcff78c834fcb05318f0e3))
+
+
+### BREAKING CHANGES
+
+* removed Refeds auth proc filter
+
 # [5.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v4.1.3...v5.0.0) (2021-08-18)
 
 
