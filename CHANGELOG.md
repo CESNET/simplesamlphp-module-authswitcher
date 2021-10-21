@@ -1,3 +1,10 @@
+# [6.1.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.0.0...v6.1.0) (2021-10-21)
+
+
+### Features
+
+* do not repeat MFA on proxy ([8c2fbcb](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/8c2fbcb0603d7c5edfdc1361e351794951548e36)), closes [#3](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/issues/3)
+
 # [6.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v5.0.0...v6.0.0) (2021-10-06)
 
 
