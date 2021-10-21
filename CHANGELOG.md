@@ -1,3 +1,10 @@
+## [6.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.0...v6.1.1) (2021-10-21)
+
+
+### Bug Fixes
+
+* fix handling unsupported authn contexts ([0bdab33](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/0bdab3379718b4fbf7bac5cda9ce7bb494b2e027))
+
 # [6.1.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.0.0...v6.1.0) (2021-10-21)
 
 
