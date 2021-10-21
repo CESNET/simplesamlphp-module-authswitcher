@@ -105,7 +105,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->requestedMFA = self::MFAin($supportedRequestedContexts);
             if (! empty($supportedRequestedContexts)) {
                 // check for unsatisfiable combinations
-                $this->testAuthnContextComparison($requestedAuthnContext['Comparison']);
+                $this->testAuthnContextComparison($requestedAuthnContext['Comparison'], $state);
                 // switch to MFA if prefered
                 if ($this->userCanMFA && self::isMFAprefered($supportedRequestedContexts)) {
                     $performMFA = true;
@@ -116,9 +116,17 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         }
         $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS] = $supportedRequestedContexts;
         if ($performMFA) {
-            // MFA
-            $this->performMFA($state);
-            // setAuthnContext is called in www/switchMfaMethods.php
+            if (
+                isset($state['saml:sp:State']['saml:sp:AuthnContext']) &&
+                in_array(AuthSwitcher::MFA, $state['saml:sp:State']['saml:sp:AuthnContext'], true)
+            ) {
+                $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
+                self::setAuthnContext($state);
+            } else {
+                // MFA
+                $this->performMFA($state);
+                // setAuthnContext is called in www/switchMfaMethods.php
+            }
         } else {
             // SFA
             self::setAuthnContext($state);
@@ -132,7 +140,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         ) ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
         $possibleReplies = array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]);
         if (empty($possibleReplies)) {
-            self::noAuthnContextResponder();
+            self::noAuthnContextResponder($state);
         } else {
             $state['saml:AuthnContextClassRef'] = $possibleReplies[0];
         }
@@ -193,31 +201,31 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      *
      * @throws NoAuthnContext
      */
-    private function testAuthnContextComparison($comparison)
+    private function testAuthnContextComparison($comparison, $state)
     {
         switch ($comparison) {
             case 'better':
                 if (! $this->userCanMFA || ! $this->requestedSFA) {
-                    self::noAuthnContextResponder();
+                    self::noAuthnContextResponder($state);
                 }
                 break;
             case 'minimum':
                 if (! $this->userCanMFA && $this->requestedMFA) {
-                    self::noAuthnContextResponder();
+                    self::noAuthnContextResponder($state);
                 }
                 break;
             case 'maximum':
                 if (! $this->userCanSFA && $this->requestedSFA) {
-                    self::noAuthnContextResponder();
+                    self::noAuthnContextResponder($state);
                 }
                 break;
             case 'exact':
             default:
                 if (! $this->userCanMFA && ! $this->requestedSFA) {
-                    self::noAuthnContextResponder();
+                    self::noAuthnContextResponder($state);
                 }
                 if (! $this->userCanSFA && ! $this->requestedMFA) {
-                    self::noAuthnContextResponder();
+                    self::noAuthnContextResponder($state);
                 }
                 break;
         }
@@ -226,7 +234,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     /**
      * @throws NoAuthnContext
      */
-    private static function noAuthnContextResponder()
+    private static function noAuthnContextResponder($state)
     {
         State::throwException(
             $state[AuthSwitcher::ERROR_STATE],
