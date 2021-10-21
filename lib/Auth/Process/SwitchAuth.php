@@ -88,10 +88,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         ) {
             $requestedAuthnContext = $state['saml:RequestedAuthnContext'];
             $requestedContexts = $requestedAuthnContext['AuthnContextClassRef'];
-            $supportedRequestedContexts = array_intersect(
+            $supportedRequestedContexts = array_values(array_intersect(
                 $requestedAuthnContext['AuthnContextClassRef'],
                 AuthSwitcher::SUPPORTED
-            );
+            ));
 
             if (! empty($requestedContexts) && empty($supportedRequestedContexts)) {
                 State::throwException(
