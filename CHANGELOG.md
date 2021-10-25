@@ -1,3 +1,10 @@
+## [6.1.2](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.1...v6.1.2) (2021-10-25)
+
+
+### Bug Fixes
+
+* fix index error ([7169aad](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/7169aad7ac6fc13956583b26613e88e196a7cfe3)), closes [#4](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/issues/4)
+
 ## [6.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.0...v6.1.1) (2021-10-21)
 
 
