@@ -138,7 +138,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $possibleReplies = self::wasMFAPerformed(
             $state
         ) ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
-        $possibleReplies = array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]);
+        $possibleReplies = array_values(
+            array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
+        );
         if (empty($possibleReplies)) {
             self::noAuthnContextResponder($state);
         } else {
