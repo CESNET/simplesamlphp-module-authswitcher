@@ -1,3 +1,10 @@
+## [6.1.3](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.2...v6.1.3) (2021-10-26)
+
+
+### Bug Fixes
+
+* fix random bugs with consent module, preventing users to log in for the first time ([83cd30e](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/83cd30ec11b7994f57f87bbcabe35f7c3e6c1153)), closes [#5](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/issues/5)
+
 ## [6.1.2](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.1...v6.1.2) (2021-10-25)
 
 
