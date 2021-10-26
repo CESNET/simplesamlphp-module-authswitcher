@@ -77,10 +77,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         // only SFA => SFA, inactive MFA (both) => SFA (if MFA not preferred by SP), active MFA => MFA
         // i.e. when possible, SFA is prefered
 
-        $state[AuthSwitcher::ERROR_STATE] = $state;
-        unset($state[AuthSwitcher::ERROR_STATE][State::EXCEPTION_HANDLER_URL]);
-        $state[AuthSwitcher::ERROR_STATE][State::EXCEPTION_HANDLER_FUNC]
+        $error_state = State::cloneState($state);
+        unset($error_state[State::EXCEPTION_HANDLER_URL]);
+        $error_state[State::EXCEPTION_HANDLER_FUNC]
             = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
+        $state[AuthSwitcher::ERROR_STATE_ID] = State::saveState($error_state, Authswitcher::ERROR_STATE_STAGE);
 
         if (
             isset($state['saml:RequestedAuthnContext'])
@@ -95,10 +96,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
             if (! empty($requestedContexts) && empty($supportedRequestedContexts)) {
                 State::throwException(
-                    $state[AuthSwitcher::ERROR_STATE],
+                    State::loadState($state[AuthSwitcher::ERROR_STATE_ID], AuthSwitcher::ERROR_STATE_STAGE),
                     new NoAuthnContext(AuthSwitcher::SAML2_STATUS_REQUESTER)
                 );
-                exit;
             }
 
             $this->requestedSFA = self::SFAin($supportedRequestedContexts);
@@ -239,7 +239,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private static function noAuthnContextResponder($state)
     {
         State::throwException(
-            $state[AuthSwitcher::ERROR_STATE],
+            State::loadState($state[AuthSwitcher::ERROR_STATE_ID], Authswitcher::ERROR_STATE_STAGE),
             new NoAuthnContext(AuthSwitcher::SAML2_STATUS_RESPONDER)
         );
         exit;

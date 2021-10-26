@@ -56,5 +56,7 @@ class AuthSwitcher
 
     public const SAML2_STATUS_REQUESTER = 'urn:oasis:names:tc:SAML:2.0:status:Requester';
 
-    public const ERROR_STATE = 'authswitcher_error_state';
+    public const ERROR_STATE_ID = 'authswitcher_error_state_id';
+
+    public const ERROR_STATE_STAGE = 'authSwitcher:errorState';
 }
