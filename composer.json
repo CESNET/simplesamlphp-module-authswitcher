@@ -17,5 +17,9 @@
   },
   "require-dev": {
     "symplify/easy-coding-standard": "^9.2"
+  },
+  "suggest": {
+    "cesnet/simplesamlphp-module-webauthn": "WebAuthn 2FA",
+    "cesnet/simplesamlphp-module-totp": "TOTP 2FA"
   }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset>
+    <!-- Scan everything -->
+    <file>.</file>
+
+    <!-- Exclude the Composer Vendor directory. -->
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+    <exclude-pattern>/vendor/*</exclude-pattern>
+
+    <!-- Append arg -s to phpcs to display the name of failed sniffs -->
+    <arg value="s"/>
+
+    <!-- Use standard PSR12 -->
+    <rule ref="PSR12" />
+</ruleset>
