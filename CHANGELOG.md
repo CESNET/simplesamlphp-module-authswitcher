@@ -1,3 +1,15 @@
+# [7.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.3...v7.0.0) (2021-11-10)
+
+
+### Features
+
+* proxy mode, refactoring, bug fixes ([4dd3b3f](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/4dd3b3feea8f425716794f8b0fd40809e1f9f8d9))
+
+
+### BREAKING CHANGES
+
+* removed AttributeAlterCallback auth proc filter
+
 ## [6.1.3](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.2...v6.1.3) (2021-10-26)
 
 
