@@ -1,8 +1,6 @@
 # SimpleSAMLPHP module authswitcher
 
-Module for toggling [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) and honoring + setting `AuthnContextClassRef`.
-
-The module was tested on a Debian 9 server with PHP 7.4 and SSP 1.18.3.
+Module for toggling [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc) and honoring + setting `AuthnContextClassRef`, both for IdP and proxy.
 
 ## Install
 
@@ -17,25 +15,25 @@ The modules that are going to be controlled by authswitcher need to be installed
 Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 
 ```php
-54 => [
+53 => [
     'class' => 'authswitcher:SwitchAuth',
-        'configs' => [
-            'totp:Totp' => [
-                'secret_attr' => 'totp_secret',
-                'enforce_2fa' => true,
-                'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
-            ],
-            'webauthn:WebAuthn' => [
-                'redirect_url' => 'https://id.muni.cz/webauthn/authentication_request',
-                'api_url' => 'https://id.muni.cz/webauthn/request',
-                'signing_key' => 'webauthn_private.pem',
-                'user_id' => 'uniqueId',
-                'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
-            ],
+    'configs' => [
+        'totp:Totp' => [
+            'secret_attr' => 'totp_secret',
+            'enforce_2fa' => true,
+            'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
+        ],
+        'webauthn:WebAuthn' => [
+            'redirect_url' => 'https://id.muni.cz/webauthn/authentication_request',
+            'api_url' => 'https://id.muni.cz/webauthn/request',
+            'signing_key' => 'webauthn_private.pem',
+            'user_id' => 'uniqueId',
+            'skip_redirect_url' => 'https://id.muni.cz/simplesaml/module.php/authswitcher/switchMfaMethods.php',
         ],
     ],
+],
 // as a safety precausion, remove the "secret" attributes
-53 => [
+54 => [
     'class' => 'core:AttributeAlter',
     'subject' => 'totp_secret',
     'pattern' => '/.*/',
@@ -43,24 +41,26 @@ Add an instance of the auth proc filter `authswitcher:SwitchAuth`:
 ],
 ```
 
-If Attributes array contains at least one mfaToken which is not revoked and mfaEnforce attribute is set or mfa is preferred by SP, SwitchAuth proc filter runs [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) or
-[TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) proc filter, decided by type of mfaToken. If both token types are available, proc filter is decided by type of running device (TOTP for mobile devices, WebAuthn for desktops and laptops).
+## MFA tokens
 
-It is possible to redirect from [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn) and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) to switchMfaMethods script, which checks authentication result and if result is negative, it runs next proc filter if available.
+This module expects that there will be a user attribute (`$attributes` aka `$state['Attributes']`) with key `"mfaTokens"` filled with the tokens registered by the supported 2FA modules (array of JSON strings).
 
-## Extend this module
+When MFA is run, if there is at least one MFA token which is not revoked and either `"mfaEnforce"` user attribute is set or MFA is preferred by SP (from `AuthnContext`), the `SwitchAuth` auth proc filter runs one of the configured supported 2FA modules, decided by type of user's MFA tokens. If more than one token types are available, the 2FA method is decided by device type (TOTP is preferred for mobile devices, WebAuthn for desktops and laptops).
 
-### Custom AuthFilterMethod
+If the user has multiple token types, it is possible to switch between them. The supported MFA modules redirect to `switchMfaMethods.php`, which checks authentication result and if MFA has not completed, it runs the next 2FA method filter.
 
-If you want to add a new MFA method, create a class whose name is in the form `\SimpleSAML\Module\authswitcher\*Modulenamefiltername*` and it extends [\SimpleSAML\Module\authswitcher\AuthFilterMethod](https://gitlab.ics.muni.cz/id.muni.cz/id.muni.cz-authswitcher/blob/master/lib/AuthFilterMethod.php).
-For example for a filter named `bar` of a module named `foo`:
+## Running in proxy mode
+
+In the proxy mode, it is assumed that the upstream IdP used for authentication could handle the requested `AuthnContext` already. You just need to set the `proxy_mode` configuration option to `true`:
 
 ```php
-class \SimpleSAML\Module\authswitcher\Foobar extends \SimpleSAML\Module\authswitcher\AuthFilterMethod {
-    /* ... */
-}
+53 => [
+    'class' => 'authswitcher:SwitchAuth',
+    'proxy_mode' => true,
+    'configs' => [
+        // ...
+    ],
+]
 ```
-
-Then configure authswitcher to use filter `foo:bar` and this class will be used.
 
 © 2017-2021 CSIRT-MU
