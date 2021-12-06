@@ -10,7 +10,6 @@ use SimpleSAML\Module\authswitcher\AuthnContextHelper;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
 use SimpleSAML\Module\authswitcher\ProxyHelper;
 use SimpleSAML\Module\authswitcher\Utils;
-use SimpleSAML\Module\saml\Error\NoAuthnContext;
 
 class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 {
@@ -63,15 +62,24 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         $usersCapabilities = $this->getMFAForUid($state);
 
+        self::info('user capabilities: ' . json_encode($usersCapabilities));
+
         self::setErrorHandling($state);
 
-        $upstreamContext = $this->proxyMode ? ProxyHelper::fetchContextFromUpstreamIdp($state) : null;
+        if ($this->proxyMode) {
+            $upstreamContext = ProxyHelper::fetchContextFromUpstreamIdp($state);
+            self::info('upstream context: ' . $upstreamContext);
+        } else {
+            $upstreamContext = null;
+        }
 
         $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS] = AuthnContextHelper::getSupportedRequestedContexts(
             $usersCapabilities,
             $state,
             $upstreamContext
         );
+
+        self::info('supported requested contexts: ' . json_encode($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]));
 
         $performMFA = ! AuthnContextHelper::SFAin($usersCapabilities) || (
             AuthnContextHelper::MFAin($usersCapabilities)
@@ -133,6 +141,16 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private function warning($message)
     {
         Logger::warning(self::DEBUG_PREFIX . $message);
+    }
+
+    /**
+     * Log an info.
+     *
+     * @param $message
+     */
+    private function info($message)
+    {
+        Logger::info(self::DEBUG_PREFIX . $message);
     }
 
     /**

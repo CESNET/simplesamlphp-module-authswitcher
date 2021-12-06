@@ -2,6 +2,9 @@
 
 namespace SimpleSAML\Module\authswitcher;
 
+use SimpleSAML\Auth\State;
+use SimpleSAML\Module\saml\Error\NoAuthnContext;
+
 /**
  * Authentication context handling.
  */
@@ -21,6 +24,7 @@ class AuthnContextHelper
     {
         $requestedContexts = $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] ?? null;
         if (empty($requestedContexts)) {
+            Logger::info('authswitcher: no AuthnContext requested, using default: ' . json_encode(AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS));
             return AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
         }
         $supportedRequestedContexts = array_values(array_intersect($requestedContexts, AuthSwitcher::SUPPORTED));
@@ -30,6 +34,7 @@ class AuthnContextHelper
             && empty($supportedRequestedContexts) // nothing of that is supported by authswitcher
             && empty($upstreamContext) // it was neither filled from upstream IdP
         ) {
+            Logger::info('authswitcher: no requested AuthnContext is supported: ' . json_encode($requestedContexts));
             self::noAuthnContextRequester($state);
         }
 
@@ -42,6 +47,7 @@ class AuthnContextHelper
                 $upstreamContext
             )
         ) {
+            Logger::info('authswitcher: no requested AuthnContext can be fulfilled: ' . json_encode($requestedContexts));
             self::noAuthnContextResponder($state);
         }
 

@@ -3,6 +3,7 @@
 namespace SimpleSAML\Module\authswitcher;
 
 use SimpleSAML\Error\Exception;
+use SimpleSAML\Module;
 
 /**
  * Methods not specific to this module.
@@ -27,7 +28,7 @@ class Utils
         $invalidModules = [];
         foreach ($filters as $filter) {
             list($module) = explode(':', $filter);
-            if (! \SimpleSAML\Module::isModuleEnabled($module)) {
+            if (! Module::isModuleEnabled($module)) {
                 $invalidModules[] = $module;
             }
         }
