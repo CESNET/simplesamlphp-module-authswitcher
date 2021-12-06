@@ -24,7 +24,9 @@ class AuthnContextHelper
     {
         $requestedContexts = $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] ?? null;
         if (empty($requestedContexts)) {
-            Logger::info('authswitcher: no AuthnContext requested, using default: ' . json_encode(AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS));
+            Logger::info(
+                'authswitcher: no AuthnContext requested, using default: ' . json_encode(AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS)
+            );
             return AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
         }
         $supportedRequestedContexts = array_values(array_intersect($requestedContexts, AuthSwitcher::SUPPORTED));
@@ -47,7 +49,9 @@ class AuthnContextHelper
                 $upstreamContext
             )
         ) {
-            Logger::info('authswitcher: no requested AuthnContext can be fulfilled: ' . json_encode($requestedContexts));
+            Logger::info(
+                'authswitcher: no requested AuthnContext can be fulfilled: ' . json_encode($requestedContexts)
+            );
             self::noAuthnContextResponder($state);
         }
 
