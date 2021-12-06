@@ -1,3 +1,10 @@
+## [7.0.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.0.0...v7.0.1) (2021-12-06)
+
+
+### Bug Fixes
+
+* add missing import, add logging ([98a193d](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/98a193dc8d5b18b7601db8e41f4697a913cfb15e))
+
 # [7.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v6.1.3...v7.0.0) (2021-11-10)
 
 
