@@ -8,8 +8,7 @@
     "@semantic-release/gitlab-config": "8.0.0",
     "cz-conventional-changelog": "3.3.0",
     "prettier": "^2.2.1",
-    "semantic-release": "17.4.2",
-    "semantic-release-license": "^1.0.3"
+    "semantic-release": "17.4.2"
   },
   "config": {
     "commitizen": {
