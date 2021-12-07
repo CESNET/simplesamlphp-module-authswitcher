@@ -3,6 +3,7 @@
 namespace SimpleSAML\Module\authswitcher;
 
 use SimpleSAML\Auth\State;
+use SimpleSAML\Logger;
 use SimpleSAML\Module\saml\Error\NoAuthnContext;
 
 /**
