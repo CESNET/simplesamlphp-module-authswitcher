@@ -63,4 +63,4 @@ In the proxy mode, it is assumed that the upstream IdP used for authentication c
 ]
 ```
 
-© 2017-2021 CSIRT-MU
+© 2017-2022 Pavel Břoušek, Institute of Computer Science, Masaryk University and CESNET, z. s. p. o. All rights reserved.
