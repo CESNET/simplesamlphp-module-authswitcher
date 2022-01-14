@@ -28,7 +28,7 @@ $state = State::loadState($id, 'authSwitcher:request');
 Utils::checkVariableInStateAttributes($state, 'MFA_RESULT');
 Utils::checkVariableInStateAttributes($state, 'Config');
 Utils::checkVariableInStateAttributes($state, 'Reserved');
-Utils::checkVariableInStateAttributes($state, 'MFA_METHODS');
+Utils::checkVariableInStateAttributes($state, 'MFA_FILTERS');
 Utils::checkVariableInStateAttributes($state, 'MFA_FILTER_INDEX');
 $config = json_decode($state['Attributes']['Config'], true);
 $mfaResult = $state['Attributes']['MFA_RESULT'];
@@ -37,12 +37,12 @@ if ($state['Attributes']['MFA_RESULT'] === 'Authenticated') {
     SwitchAuth::setAuthnContext($state);
     ProcessingChain::resumeProcessing($state);
 } else {
-    if (count($state['Attributes']['MFA_METHODS']) - 1 === $mfaFilterIndex) {
+    if (count($state['Attributes']['MFA_FILTERS']) - 1 === $mfaFilterIndex) {
         $mfaFilterIndex = 0;
     } else {
         $mfaFilterIndex = $mfaFilterIndex + 1;
     }
     $state['Attributes']['MFA_FILTER_INDEX'] = $mfaFilterIndex;
-    $method = $state['Attributes']['MFA_METHODS'][$mfaFilterIndex];
+    $method = $state['Attributes']['MFA_FILTERS'][$mfaFilterIndex];
     Utils::runAuthProcFilter($method, $config[$method], $state, $state['Attributes']['Reserved']);
 }
