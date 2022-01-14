@@ -1,3 +1,10 @@
+# [7.1.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.0.2...v7.1.0) (2022-01-14)
+
+
+### Features
+
+* added new GetMfaTokensPrivacyIDEA filter, updated config of SwitchAuth filter ([17016a9](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/17016a9da92d2765de74d50dd28377d167eae790))
+
 ## [7.0.2](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.0.1...v7.0.2) (2021-12-07)
 
 
