@@ -59,6 +59,4 @@ class AuthSwitcher
     public const ERROR_STATE_ID = 'authswitcher_error_state_id';
 
     public const ERROR_STATE_STAGE = 'authSwitcher:errorState';
-
-    public const PRIVACY_IDEA_FAIL = 'PrivacyIDEAFail';
 }

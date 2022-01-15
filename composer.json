@@ -13,8 +13,7 @@
     "web-token/jwt-easy": "^2.2",
     "simplesamlphp/composer-module-installer": "~1.0",
     "ext-json": "*",
-    "mobiledetect/mobiledetectlib": "^2.8",
-    "ext-curl": "*"
+    "mobiledetect/mobiledetectlib": "^2.8"
   },
   "require-dev": {
     "symplify/easy-coding-standard": "^9.2"
