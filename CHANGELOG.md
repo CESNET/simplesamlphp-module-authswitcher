@@ -1,3 +1,10 @@
+## [7.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.1.0...v7.1.1) (2022-01-15)
+
+
+### Bug Fixes
+
+* revert breaking changes ([665986d](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/665986d377f1b90e0ab80de8f9c56e5dadb53818))
+
 # [7.1.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.0.2...v7.1.0) (2022-01-14)
 
 
