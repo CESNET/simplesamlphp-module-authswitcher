@@ -1,3 +1,15 @@
+# [8.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.1.1...v8.0.0) (2022-01-15)
+
+
+### Features
+
+* privacyIDEA support ([c7c9074](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/c7c9074cb94c90e6f690b72e81dc58f98a523497))
+
+
+### BREAKING CHANGES
+
+* changes to configuration of auth proc filter
+
 ## [7.1.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.1.0...v7.1.1) (2022-01-15)
 
 
