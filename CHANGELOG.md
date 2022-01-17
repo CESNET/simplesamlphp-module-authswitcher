@@ -1,3 +1,10 @@
+## [8.0.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v8.0.0...v8.0.1) (2022-01-17)
+
+
+### Bug Fixes
+
+* wrong type in getConfig method ([22a6610](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/22a66107415635c8118417dea56a5d864ebaa1f3))
+
 # [8.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v7.1.1...v8.0.0) (2022-01-15)
 
 
