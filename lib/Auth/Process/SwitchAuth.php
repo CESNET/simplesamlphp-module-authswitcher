@@ -192,7 +192,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 . ' in the configuration are missing or disabled.'
             );
         }
-        $this->configs = $config->getArray('configs');
+        $this->configs = $config['configs'];
     }
 
     private function getMFAForUid($state)
