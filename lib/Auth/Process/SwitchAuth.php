@@ -201,8 +201,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (! empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 foreach ($this->type_filter_array as $type => $method) {
-                    $token = json_decode($mfaToken, true);
-                    if ($token['revoked'] === false && $token[$this->token_type_attr] === $type) {
+                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = AuthSwitcher::MFA;
                         break;
                     }
@@ -224,8 +223,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (! empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 foreach ($this->type_filter_array as $type => $filter) {
-                    $token = json_decode($mfaToken, true);
-                    if ($token['revoked'] === false && $token[$this->token_type_attr] === $type) {
+                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = $filter;
                     }
                 }
