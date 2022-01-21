@@ -1,3 +1,15 @@
+# [9.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v8.0.1...v9.0.0) (2022-01-21)
+
+
+### Bug Fixes
+
+* mfa tokens in state attributes have to be array not string ([4a507e5](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/4a507e5240859c9292242a5ce8a6d978c7bcf604))
+
+
+### BREAKING CHANGES
+
+* mfa tokens in state attributes type changed
+
 ## [8.0.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v8.0.0...v8.0.1) (2022-01-17)
 
 
