@@ -93,7 +93,24 @@ Add an instance of the auth proc filter with example configuration `authswitcher
 ## MFA tokens
 
 This module expects that there will be a user attribute (`$attributes` aka `$state['Attributes']`) with
-key `"mfaTokens"` filled with the tokens registered by the supported 2FA modules (array of JSON strings).
+key `"mfaTokens"` filled with the tokens registered by the supported 2FA modules (array of arrays).
+
+example of mfaTokens:
+
+```php
+mfaTokens => [
+    [0] => [
+        "added"   => "2021-09-06 14:40:06",
+        "revoked" => false,
+        "secret"  => "topsecret",
+        "userId"  => "43215",
+        "type"    => "TOTP",
+    ],
+    [1] => [
+        ...
+    ],
+]
+```
 
 When MFA is run, if there is at least one MFA token which is not revoked and either `"mfaEnforce"` user attribute is set
 or MFA is preferred by SP (from `AuthnContext`), the `SwitchAuth` auth proc filter runs one of the configured supported
