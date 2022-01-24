@@ -1,3 +1,10 @@
+## [9.0.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v9.0.0...v9.0.1) (2022-01-24)
+
+
+### Bug Fixes
+
+* set AuthnContext properly ([136ac9c](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/commit/136ac9c885cee055c7771403737544c554c9bbb1))
+
 # [9.0.0](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v8.0.1...v9.0.0) (2022-01-21)
 
 
