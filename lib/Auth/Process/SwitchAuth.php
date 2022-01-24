@@ -113,7 +113,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if ($performMFA) {
             // MFA
             $this->performMFA($state);
-        // setAuthnContext is called in www/switchMfaMethods.php
         } elseif (empty($upstreamContext)) {
             // SFA
             self::setAuthnContext($state);
@@ -272,6 +271,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (! isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
             $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
         }
+        self::setAuthnContext($state);
         $state['Attributes']['Config'] = json_encode($this->configs);
         if ($this->reserved === null) {
             $this->reserved = '';

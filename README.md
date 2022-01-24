@@ -14,6 +14,8 @@ The module is enabled by default.
 
 The modules that are going to be controlled by authswitcher need to be installed separately.
 
+Security consideration: It is assumed that none of the auth proc modules allows user to skip the verification in other way than using the method switching/skipping of this module. If there is such option, you need to disable it, otherwise users can bypass MFA while asserting the REFEDS MFA profile.
+
 ## GetMfaTokensPrivacyIDEA auth proc filter
 
 Use this filter to read user mfa tokens from PrivacyIDEA server to state attributes.
