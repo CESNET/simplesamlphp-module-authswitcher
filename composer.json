@@ -14,7 +14,7 @@
   ],
   "license": "BSD-2-Clause",
   "require": {
-    "php": ">=7.1.0",
+    "php": "^7.1",
     "web-token/jwt-easy": "^2.2",
     "simplesamlphp/composer-module-installer": "~1.0",
     "ext-json": "*",
