@@ -100,16 +100,16 @@ key `"mfaTokens"` filled with the tokens registered by the supported 2FA modules
 example of mfaTokens:
 
 ```php
-mfaTokens => [
-    [0] => [
+[
+    [
         "added"   => "2021-09-06 14:40:06",
         "revoked" => false,
         "secret"  => "topsecret",
         "userId"  => "43215",
         "type"    => "TOTP",
     ],
-    [1] => [
-        ...
+    [
+        // ...
     ],
 ]
 ```

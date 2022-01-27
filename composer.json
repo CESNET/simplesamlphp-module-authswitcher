@@ -1,13 +1,18 @@
 {
-  "name": "id.muni.cz/simplesamlphp-module-authswitcher",
+  "name": "cesnet/simplesamlphp-module-authswitcher",
   "description": "A SimpleSAMLphp module for applying 2FA modules to specific users",
   "type": "simplesamlphp-module",
   "authors": [
     {
       "name": "Pavel Břoušek",
       "email": "433364@muni.cz"
+    },
+    {
+      "name": "Jan Pavlíček",
+      "email": "469355@muni.cz"
     }
   ],
+  "license": "BSD-2-Clause",
   "require": {
     "php": ">=7.1.0",
     "web-token/jwt-easy": "^2.2",
@@ -20,6 +25,7 @@
     "symplify/easy-coding-standard": "^10.0"
   },
   "suggest": {
+    "privacyidea/simplesamlphp-module-privacyidea": "privacyIDEA 2FA",
     "cesnet/simplesamlphp-module-webauthn": "WebAuthn 2FA",
     "cesnet/simplesamlphp-module-totp": "TOTP 2FA"
   }
