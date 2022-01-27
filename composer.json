@@ -12,9 +12,14 @@
       "email": "469355@muni.cz"
     }
   ],
+  "config": {
+    "platform": {
+      "php": "7.4"
+    }
+  },
   "license": "BSD-2-Clause",
   "require": {
-    "php": "^7.1",
+    "php": "^7.1 || ^8",
     "web-token/jwt-easy": "^2.2",
     "simplesamlphp/composer-module-installer": "~1.0",
     "ext-json": "*",
