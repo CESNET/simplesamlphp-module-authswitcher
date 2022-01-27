@@ -17,7 +17,7 @@
     "ext-curl": "*"
   },
   "require-dev": {
-    "symplify/easy-coding-standard": "^9.2"
+    "symplify/easy-coding-standard": "^10.0"
   },
   "suggest": {
     "cesnet/simplesamlphp-module-webauthn": "WebAuthn 2FA",

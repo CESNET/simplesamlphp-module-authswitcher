@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
 use SimpleSAML\Configuration;
@@ -43,8 +45,9 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         $state[Authswitcher::PRIVACY_IDEA_FAIL] = false;
         $state['Attributes'][$this->tokens_attr] = [];
         $admin_token = $this->getAuthToken();
-        if ($admin_token === null) {
+        if (null === $admin_token) {
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
+
             return;
         }
         foreach ($this->tokens_type as $token_type) {
@@ -68,12 +71,14 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+        if (200 !== curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
             Logger::warning(sprintf(self::DEBUG_PREFIX . 'getAuthToken Response from PrivacyIDEA API: %s', $response));
+
             return null;
         }
         curl_close($ch);
         $response = json_decode($response, true);
+
         return $response['result']['value']['token'];
     }
 
@@ -86,14 +91,16 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization:' . $admin_token]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
+        if (200 !== curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
             Logger::warning(sprintf(self::DEBUG_PREFIX .
                 'getPrivacyIdeaTokens type: %s Response from PrivacyIDEA API: %s', $type, $response));
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
+
             return [];
         }
         $response = json_decode($response, true);
         curl_close($ch);
+
         return $response['result']['value']['tokens'];
     }
 

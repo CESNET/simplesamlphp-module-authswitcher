@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Module\authswitcher;
 
 use SimpleSAML\Auth\State;
@@ -18,7 +20,7 @@ class AuthnContextHelper
 
     public static function isMFAprefered($supportedRequestedContexts = [])
     {
-        return count($supportedRequestedContexts) > 0 && $supportedRequestedContexts[0] === AuthSwitcher::MFA;
+        return count($supportedRequestedContexts) > 0 && AuthSwitcher::MFA === $supportedRequestedContexts[0];
     }
 
     public static function getSupportedRequestedContexts($usersCapabilities, $state, $upstreamContext)
@@ -30,12 +32,13 @@ class AuthnContextHelper
                     AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS
                 )
             );
+
             return AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
         }
         $supportedRequestedContexts = array_values(array_intersect($requestedContexts, AuthSwitcher::SUPPORTED));
 
         if (
-            ! empty($requestedContexts) // sp has requested something
+            !empty($requestedContexts) // sp has requested something
             && empty($supportedRequestedContexts) // nothing of that is supported by authswitcher
             && empty($upstreamContext) // it was neither filled from upstream IdP
         ) {
@@ -45,7 +48,7 @@ class AuthnContextHelper
 
         // check for unsatisfiable combinations
         if (
-            ! self::testComparison(
+            !self::testComparison(
                 $usersCapabilities,
                 $supportedRequestedContexts,
                 $state['saml:RequestedAuthnContext']['Comparison'],
@@ -75,6 +78,11 @@ class AuthnContextHelper
     /**
      * If the Comparison attribute is set to “better”, “minimum”, or “maximum”, the method of authentication
      * must be stronger than, at least as strong as, or no stronger than one of the specified authentication classes.
+     *
+     * @param mixed      $usersCapabilities
+     * @param mixed      $supportedRequestedContexts
+     * @param mixed      $comparison
+     * @param mixed|null $upstreamContext
      */
     private static function testComparison(
         $usersCapabilities,
@@ -82,8 +90,8 @@ class AuthnContextHelper
         $comparison,
         $upstreamContext = null
     ) {
-        $upstreamMFA = $upstreamContext === null ? false : self::MFAin([$upstreamContext]);
-        $upstreamSFA = $upstreamContext === null ? false : self::SFAin([$upstreamContext]);
+        $upstreamMFA = null === $upstreamContext ? false : self::MFAin([$upstreamContext]);
+        $upstreamSFA = null === $upstreamContext ? false : self::SFAin([$upstreamContext]);
 
         $requestedSFA = self::SFAin($supportedRequestedContexts);
         $requestedMFA = self::MFAin($supportedRequestedContexts);
@@ -93,26 +101,26 @@ class AuthnContextHelper
 
         switch ($comparison) {
             case 'better':
-                if (! ($userCanMFA || $upstreamMFA) || ! $requestedSFA) {
+                if (!($userCanMFA || $upstreamMFA) || !$requestedSFA) {
                     return false;
                 }
                 break;
             case 'minimum':
-                if (! ($userCanMFA || $upstreamMFA) && $requestedMFA) {
+                if (!($userCanMFA || $upstreamMFA) && $requestedMFA) {
                     return false;
                 }
                 break;
             case 'maximum':
-                if (! ($userCanSFA || $upstreamSFA) && $requestedSFA) {
+                if (!($userCanSFA || $upstreamSFA) && $requestedSFA) {
                     return false;
                 }
                 break;
             case 'exact':
             default:
-                if (! ($userCanMFA || $upstreamMFA) && ! $requestedSFA) {
+                if (!($userCanMFA || $upstreamMFA) && !$requestedSFA) {
                     return false;
                 }
-                if (! ($userCanSFA || $upstreamSFA) && ! $requestedMFA) {
+                if (!($userCanSFA || $upstreamSFA) && !$requestedMFA) {
                     return false;
                 }
                 break;

@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * Mfa switch script
+ * Mfa switch script.
  *
  * this script switch between mfa methods and perform defined method
  */
@@ -12,14 +14,14 @@ use SimpleSAML\Error\BadRequest;
 use SimpleSAML\Module\authswitcher\Utils;
 use SimpleSAML\Utils\HTTP;
 
-if (! isset($_REQUEST['StateId'])) {
+if (!isset($_REQUEST['StateId'])) {
     throw new BadRequest('Missing required StateId or Module query parameter.');
 }
 
 $id = $_REQUEST['StateId'];
 
 $sid = State::parseStateID($id);
-if ($sid['url'] !== null) {
+if (null !== $sid['url']) {
     HTTP::checkURLAllowed($sid['url']);
 }
 
@@ -32,7 +34,7 @@ Utils::checkVariableInStateAttributes($state, 'MFA_FILTER_INDEX');
 $config = json_decode($state['Attributes']['Config'], true);
 $mfaResult = $state['Attributes']['MFA_RESULT'];
 $mfaFilterIndex = $state['Attributes']['MFA_FILTER_INDEX'];
-if ($state['Attributes']['MFA_RESULT'] === 'Authenticated') {
+if ('Authenticated' === $state['Attributes']['MFA_RESULT']) {
     ProcessingChain::resumeProcessing($state);
 } else {
     if (count($state['Attributes']['MFA_FILTERS']) - 1 === $mfaFilterIndex) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Module\authswitcher\Auth\Process;
 
 use Detection\MobileDetect;
@@ -34,7 +36,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private $configs = [];
 
     /**
-     * Second constructor parameter
+     * Second constructor parameter.
      */
     private $reserved;
 
@@ -44,10 +46,13 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private $token_type_attr = 'type';
 
-    private $preferred_filter = null;
+    private $preferred_filter;
 
     /**
      * @override
+     *
+     * @param mixed $config
+     * @param mixed $reserved
      */
     public function __construct($config, $reserved)
     {
@@ -69,6 +74,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     /**
      * @override
+     *
+     * @param mixed $state
      */
     public function process(&$state)
     {
@@ -99,15 +106,15 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->mfa_preferred_privacyidea_fail && isset($state[AuthSwitcher::PRIVACY_IDEA_FAIL]) &&
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] &&
             AuthnContextHelper::isMFAprefered($state[Authswitcher::SUPPORTED_REQUESTED_CONTEXTS]) &&
-            ! AuthnContextHelper::MFAin([$upstreamContext])
+            !AuthnContextHelper::MFAin([$upstreamContext])
         ) {
             throw new Exception(self::DEBUG_PREFIX . 'MFA is preferred but connection to privacyidea failed.');
         }
 
-        $performMFA = ! AuthnContextHelper::SFAin($usersCapabilities) || (
+        $performMFA = !AuthnContextHelper::SFAin($usersCapabilities) || (
             AuthnContextHelper::MFAin($usersCapabilities)
                 && AuthnContextHelper::isMFAprefered($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
-                && ! AuthnContextHelper::MFAin([$upstreamContext])
+                && !AuthnContextHelper::MFAin([$upstreamContext])
         ); // switch to MFA if preferred and not already done if we handle the proxy mode
 
         if ($performMFA) {
@@ -136,6 +143,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     /**
      * Handle NoAuthnContext errors by SAML responses.
+     *
+     * @param mixed $state
      */
     private static function setErrorHandling(&$state)
     {
@@ -149,10 +158,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     /**
      * Check if the MFA auth proc filters (which were run) finished successfully. If everything is configured correctly,
      * this should not throw an exception.
+     *
+     * @param mixed $state
      */
     private static function wasMFAPerformed($state)
     {
-        return ! empty($state[AuthSwitcher::MFA_BEING_PERFORMED]);
+        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]);
     }
 
     /**
@@ -180,12 +191,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      */
     private function getConfig(array $config)
     {
-        if (! is_array($config['configs'])) {
+        if (!is_array($config['configs'])) {
             throw new Exception(self::DEBUG_PREFIX . 'Configurations are missing.');
         }
         $filterModules = array_keys($config['configs']);
         $invalidModules = Utils::areFilterModulesEnabled($filterModules);
-        if ($invalidModules !== true) {
+        if (true !== $invalidModules) {
             $this->warning(
                 'Some modules (' . implode(',', $invalidModules) . ')'
                 . ' in the configuration are missing or disabled.'
@@ -197,15 +208,15 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private function getMFAForUid($state)
     {
         $result = [];
-        if (! empty($state['Attributes'][self::MFA_TOKENS])) {
+        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 foreach ($this->type_filter_array as $type => $method) {
-                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
+                    if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = AuthSwitcher::MFA;
                         break;
                     }
                 }
-                if (! empty($result)) {
+                if (!empty($result)) {
                     break;
                 }
             }
@@ -213,16 +224,17 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (empty($state['Attributes']['mfaEnforced'])) {
             $result[] = AuthSwitcher::SFA;
         }
+
         return $result;
     }
 
     private function getActiveMethod(&$state)
     {
         $result = [];
-        if (! empty($state['Attributes'][self::MFA_TOKENS])) {
+        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
                 foreach ($this->type_filter_array as $type => $filter) {
-                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
+                    if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = $filter;
                     }
                 }
@@ -231,11 +243,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $result = array_values(array_unique($result));
         $detect = new MobileDetect();
         $mobile_pref = $detect->isMobile();
-        if ($result === []) {
+        if ([] === $result) {
             return null;
         }
         $state['Attributes']['MFA_FILTERS'] = $result;
-        if ($this->preferred_filter !== null && in_array($this->preferred_filter, $result, true)) {
+        if (null !== $this->preferred_filter && in_array($this->preferred_filter, $result, true)) {
             return $this->preferred_filter;
         }
         if ($mobile_pref) {
@@ -245,13 +257,14 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
             }
         }
+
         return $result[0];
     }
 
     /**
      * Perform the appropriate MFA.
      *
-     * @param $state
+     * @param mixed $state
      */
     private function performMFA(&$state)
     {
@@ -259,21 +272,20 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         if (empty($filter)) {
             throw new Exception(
-                self::DEBUG_PREFIX
-                . 'Inconsistent data - no MFA methods for a user who should be able to do MFA.'
+                self::DEBUG_PREFIX . 'Inconsistent data - no MFA methods for a user who should be able to do MFA.'
             );
         }
 
-        if (! isset($this->configs[$filter])) {
+        if (!isset($this->configs[$filter])) {
             throw new Exception(self::DEBUG_PREFIX . 'Configuration for ' . $filter . ' is missing.');
         }
 
-        if (! isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
+        if (!isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
             $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
         }
         self::setAuthnContext($state);
         $state['Attributes']['Config'] = json_encode($this->configs);
-        if ($this->reserved === null) {
+        if (null === $this->reserved) {
             $this->reserved = '';
         }
         $state['Attributes']['Reserved'] = $this->reserved;

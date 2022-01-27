@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SimpleSAML\Module\authswitcher;
 
 /**
@@ -18,22 +20,22 @@ class AuthSwitcher
     public const SUPPORTED_REQUESTED_CONTEXTS = 'authswitcher_supported_requested_contexts';
 
     /**
-     * REFEDS profile for SFA
+     * REFEDS profile for SFA.
      */
     public const SFA = 'https://refeds.org/profile/sfa';
 
     /**
-     * REFEDS profile for MFA
+     * REFEDS profile for MFA.
      */
     public const MFA = 'https://refeds.org/profile/mfa';
 
     /**
-     * Password AuthnContext
+     * Password AuthnContext.
      */
     public const PASS = 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport';
 
     /**
-     * Supported AuthnContexts (pass <= sfa < mfa)
+     * Supported AuthnContexts (pass <= sfa < mfa).
      */
     public const SUPPORTED = [self::PASS, self::SFA, self::MFA];
 
