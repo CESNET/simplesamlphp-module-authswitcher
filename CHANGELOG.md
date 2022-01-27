@@ -1,3 +1,10 @@
+## [9.0.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.0.1...v9.0.2) (2022-01-27)
+
+
+### Bug Fixes
+
+* first Packagist release ([974afa6](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/974afa6b1d432528502fb66b076fc1a975a4204e))
+
 ## [9.0.1](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-authswitcher/compare/v9.0.0...v9.0.1) (2022-01-24)
 
 
