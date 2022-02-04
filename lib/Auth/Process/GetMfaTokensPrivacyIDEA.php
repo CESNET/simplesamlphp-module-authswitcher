@@ -7,10 +7,14 @@ namespace SimpleSAML\Module\authswitcher\Auth\Process;
 use SimpleSAML\Configuration;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
+use SimpleSAML\Store;
 
 class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 {
     private const DEBUG_PREFIX = 'authswitcher:GetMfaTokensPrivacyIDEA: ';
+    private const AS_PI = 'as_pi';
+    private const AS_PI_AUTH_TOKEN = 'auth_token';
+    private const AS_PI_AUTH_TOKEN_ISSUED_AT = 'auth_token_issued_at';
 
     private $tokens_attr = 'mfaTokens';
 
@@ -26,6 +30,10 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 
     private $token_type_attr = 'type';
 
+    private $enable_cache = false;
+
+    private $cache_expiration_seconds = 55 * 60;
+
     public function __construct($config, $reserved)
     {
         parent::__construct($config, $reserved);
@@ -38,13 +46,18 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         $this->tokens_type = $config->getArray('tokens_type', $this->tokens_type);
         $this->user_attribute = $config->getString('user_attribute', $this->user_attribute);
         $this->token_type_attr = $config->getString('token_type_attr', $this->token_type_attr);
+        $this->enable_cache = $config->getBoolean('enable_cache', $this->enable_cache);
+        $this->cache_expiration_seconds = $config->getInteger(
+            'cache_expiration_seconds',
+            $this->cache_expiration_seconds
+        );
     }
 
     public function process(&$state)
     {
         $state[Authswitcher::PRIVACY_IDEA_FAIL] = false;
         $state['Attributes'][$this->tokens_attr] = [];
-        $admin_token = $this->getAuthToken();
+        $admin_token = $this->getAdminToken();
         if (null === $admin_token) {
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
 
@@ -54,6 +67,29 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
             $tokens = self::getPrivacyIdeaTokensByType($state, strtolower($token_type), $admin_token);
             $this->saveTokensToStateAttributes($state, $tokens);
         }
+    }
+
+    private function getAdminToken()
+    {
+        if ($this->enable_cache) {
+            $store = Store::getInstance();
+            $issued_at = $store->get(self::AS_PI, self::AS_PI_AUTH_TOKEN_ISSUED_AT);
+            if ($issued_at && time() - $issued_at < $this->cache_expiration_seconds) {
+                $admin_token = $store->get(self::AS_PI, self::AS_PI_AUTH_TOKEN);
+                if ($admin_token) {
+                    Logger::debug(self::DEBUG_PREFIX . 'Using auth token from cache');
+
+                    return $admin_token;
+                }
+            }
+        }
+        $admin_token = $this->getAuthToken();
+        if ($this->enable_cache) {
+            $store->set(self::AS_PI, self::AS_PI_AUTH_TOKEN, $admin_token);
+            $store->set(self::AS_PI, self::AS_PI_AUTH_TOKEN_ISSUED_AT, time());
+        }
+
+        return $admin_token;
     }
 
     private function getAuthToken()
