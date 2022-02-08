@@ -15,6 +15,9 @@
   "config": {
     "platform": {
       "php": "7.4"
+    },
+    "allow-plugins": {
+      "simplesamlphp/composer-module-installer": true
     }
   },
   "license": "BSD-2-Clause",
@@ -24,7 +27,8 @@
     "simplesamlphp/composer-module-installer": "~1.0",
     "ext-json": "*",
     "mobiledetect/mobiledetectlib": "^2.8",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "simplesamlphp/simplesamlphp": "^1.19"
   },
   "require-dev": {
     "symplify/easy-coding-standard": "^10.0"

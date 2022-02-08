@@ -31,11 +31,20 @@ Use this filter to read user mfa tokens from PrivacyIDEA server to state attribu
         'tokens_type' => [
             'TOTP',
             'WebAuthn',
-            ],
+        ],
         'user_attribute' => 'eduPersonPrincipalName',
         'token_type_attr' => 'type',
-        ],
     ],
+],
+```
+
+To enable caching of the privacyIDEA auth token, add:
+
+```php
+    // ...
+        'enable_cache' => true, // defaults to false
+        'cache_expiration_seconds' => 30 * 60, // defaults to 55 minutes
+    // ...
 ```
 
 ## Use (configure as auth proc filter)
