@@ -1,3 +1,10 @@
+# [9.1.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.0.2...v9.1.0) (2022-02-08)
+
+
+### Features
+
+* cache support for GetMfaTokensPrivacyIDEA ([06f2b21](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/06f2b21a2578a8a02bb76408b4ec90f5420e0135))
+
 ## [9.0.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.0.1...v9.0.2) (2022-01-27)
 
 
