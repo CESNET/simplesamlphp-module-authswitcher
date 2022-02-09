@@ -140,10 +140,11 @@ already. You just need to set the `proxy_mode` configuration option to `true`:
 ```php
 53 => [
     'class' => 'authswitcher:SwitchAuth',
-    'proxy_mode' => true,
-    'configs' => [
+    'config' => [
+        'proxy_mode' => true,
         // ...
     ],
+    //...
 ]
 ```
 
