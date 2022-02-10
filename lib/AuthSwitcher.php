@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Module\authswitcher;
 
+use SAML2\Constants;
+
 /**
  * Module-wide constants.
  */
@@ -30,14 +32,9 @@ class AuthSwitcher
     public const MFA = 'https://refeds.org/profile/mfa';
 
     /**
-     * Password AuthnContext.
-     */
-    public const PASS = 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport';
-
-    /**
      * Supported AuthnContexts (pass <= sfa < mfa).
      */
-    public const SUPPORTED = [self::PASS, self::SFA, self::MFA];
+    public const SUPPORTED = [Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::SFA, self::MFA];
 
     /**
      * Contexts to assume when request contains none.
@@ -52,11 +49,12 @@ class AuthSwitcher
     /**
      * Contexts to reply when MFA was not performed, in the order of preference.
      */
-    public const REPLY_CONTEXTS_SFA = [self::SFA, self::PASS];
+    public const REPLY_CONTEXTS_SFA = [self::SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT];
 
-    public const SAML2_STATUS_RESPONDER = 'urn:oasis:names:tc:SAML:2.0:status:Responder';
-
-    public const SAML2_STATUS_REQUESTER = 'urn:oasis:names:tc:SAML:2.0:status:Requester';
+    /**
+     * Contexts which are considered single factor authentication only.
+     */
+    public const SFA_CONTEXTS = self::REPLY_CONTEXTS_SFA;
 
     public const ERROR_STATE_ID = 'authswitcher_error_state_id';
 
