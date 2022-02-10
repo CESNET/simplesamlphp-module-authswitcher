@@ -1,3 +1,16 @@
+# [9.2.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.1.0...v9.2.0) (2022-02-10)
+
+
+### Bug Fixes
+
+* wasMFAPerformed checks whether MFA was performed on upstream ([84f01c5](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/84f01c568dba172f9d7de503218bc77f80fc85bc))
+
+
+### Features
+
+* AddAdditionalAttributesAfterMfa ([7f6b6b8](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/7f6b6b844d9db4175126ee37132e91c6f3d633d0))
+* restore support for JSON encoded tokens in SwitchAuth ([67c4df4](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/67c4df424886f37d4eb7f8deb5b1039a7f64eb9e))
+
 # [9.1.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.0.2...v9.1.0) (2022-02-08)
 
 
