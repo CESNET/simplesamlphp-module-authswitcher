@@ -128,7 +128,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     public static function setAuthnContext(&$state)
     {
-        $possibleReplies = self::wasMFAPerformed(
+        $possibleReplies = Utils::wasMFAPerformed(
             $state
         ) ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
         $possibleReplies = array_values(
@@ -153,17 +153,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $error_state[State::EXCEPTION_HANDLER_FUNC]
             = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
         $state[AuthSwitcher::ERROR_STATE_ID] = State::saveState($error_state, Authswitcher::ERROR_STATE_STAGE);
-    }
-
-    /**
-     * Check if the MFA auth proc filters (which were run) finished successfully. If everything is configured correctly,
-     * this should not throw an exception.
-     *
-     * @param mixed $state
-     */
-    private static function wasMFAPerformed($state)
-    {
-        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]);
     }
 
     /**
@@ -210,6 +199,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $result = [];
         if (!empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+                if (is_string($mfaToken)) {
+                    $mfaToken = json_decode($mfaToken, true);
+                }
+
                 foreach ($this->type_filter_array as $type => $method) {
                     if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = AuthSwitcher::MFA;
@@ -233,6 +226,10 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $result = [];
         if (!empty($state['Attributes'][self::MFA_TOKENS])) {
             foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+                if (is_string($mfaToken)) {
+                    $mfaToken = json_decode($mfaToken, true);
+                }
+
                 foreach ($this->type_filter_array as $type => $filter) {
                     if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = $filter;

@@ -29,6 +29,17 @@ class Utils
         $authFilter->process($state);
     }
 
+    /**
+     * Check whether MFA was performed, either locally (by running MFA auth proc filters) or at the upstream IdP.
+     *
+     * @param mixed      $state
+     * @param mixed|null $upstreamContext
+     */
+    public static function wasMFAPerformed($state, $upstreamContext = null)
+    {
+        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || AuthSwitcher::MFA === $upstreamContext;
+    }
+
     public static function areFilterModulesEnabled(array $filters)
     {
         $invalidModules = [];
