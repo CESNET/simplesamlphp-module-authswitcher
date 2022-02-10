@@ -128,7 +128,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     public static function setAuthnContext(&$state)
     {
-        $possibleReplies = self::wasMFAPerformed(
+        $possibleReplies = Utils::wasMFAPerformed(
             $state
         ) ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
         $possibleReplies = array_values(
@@ -153,17 +153,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $error_state[State::EXCEPTION_HANDLER_FUNC]
             = ['\\SimpleSAML\\Module\\saml\\IdP\\SAML2', 'handleAuthError'];
         $state[AuthSwitcher::ERROR_STATE_ID] = State::saveState($error_state, Authswitcher::ERROR_STATE_STAGE);
-    }
-
-    /**
-     * Check whether MFA was performed, either locally (by running MFA auth proc filters) or at the upstream IdP.
-     *
-     * @param mixed      $state
-     * @param mixed|null $upstreamContext
-     */
-    private static function wasMFAPerformed($state, $upstreamContext = null)
-    {
-        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || AuthSwitcher::MFA === $upstreamContext;
     }
 
     /**

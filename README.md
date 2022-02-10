@@ -154,6 +154,31 @@ If a user should only use MFA, set `mfaEnforced` user attribute to a non-empty v
 
 When the attribute is not empty, single factor authentication is not considered. Therefore, when an SP requests `SFA` or `PasswordProtectedTransport` specifically, the authentication will fail.
 
+## Add additional attributes when MFA is performed
+
+To add attributes only if MFA was performed, you can use a filter called `AddAdditionalAttributesAfterMfa`.
+This filter sets attributes based on whether MFA was in fact performed (at upstream IdP or locally) - not based on whether MFA is in the response AuthnContext.
+
+`AddAdditionalAttributesAfterMfa` needs to run after the `SwitchAuth` filter.
+
+In configuration, you just need to add a `custom_attrs` option which contains a map of additional attributes and their values.
+Also, you can add a `proxy_mode` option as mentioned above.
+
+```php
+55 => [
+    'class' => 'authswitcher:AddAdditionalAttributesAfterMfa',
+    'config' => [
+        'custom_attrs' => [
+            'attr1' => ['value1'],
+            'attr2' => ['value2'],
+            // ...
+        ],
+        // ...
+    ],
+    //...
+]
+```
+
 # Copyright
 
 © 2017-2022 Pavel Břoušek, Institute of Computer Science, Masaryk University and CESNET, z. s. p. o. All rights reserved.
