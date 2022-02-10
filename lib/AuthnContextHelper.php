@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Module\authswitcher;
 
+use SAML2\Constants;
 use SimpleSAML\Auth\State;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\saml\Error\NoAuthnContext;
@@ -66,13 +67,18 @@ class AuthnContextHelper
 
     public static function noAuthnContextResponder($state)
     {
-        self::noAuthnContext($state, AuthSwitcher::SAML2_STATUS_RESPONDER);
+        self::noAuthnContext($state, Constants::STATUS_RESPONDER);
     }
 
     public static function SFAin($contexts)
     {
-        return in_array(AuthSwitcher::SFA, $contexts, true)
-            || in_array(AuthSwitcher::PASS, $contexts, true);
+        foreach (AuthSwitcher::SFA_CONTEXTS as $sfa_context) {
+            if (in_array($sfa_context, $contexts, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -100,22 +106,22 @@ class AuthnContextHelper
         $userCanMFA = self::MFAin($usersCapabilities);
 
         switch ($comparison) {
-            case 'better':
+            case Constants::COMPARISON_BETTER:
                 if (!($userCanMFA || $upstreamMFA) || !$requestedSFA) {
                     return false;
                 }
                 break;
-            case 'minimum':
+            case Constants::COMPARISON_MINIMUM:
                 if (!($userCanMFA || $upstreamMFA) && $requestedMFA) {
                     return false;
                 }
                 break;
-            case 'maximum':
+            case Constants::COMPARISON_MAXIMUM:
                 if (!($userCanSFA || $upstreamSFA) && $requestedSFA) {
                     return false;
                 }
                 break;
-            case 'exact':
+            case Constants::COMPARISON_EXACT:
             default:
                 if (!($userCanMFA || $upstreamMFA) && !$requestedSFA) {
                     return false;
@@ -140,6 +146,6 @@ class AuthnContextHelper
 
     private static function noAuthnContextRequester($state)
     {
-        self::noAuthnContext($state, AuthSwitcher::SAML2_STATUS_REQUESTER);
+        self::noAuthnContext($state, Constants::STATUS_REQUESTER);
     }
 }
