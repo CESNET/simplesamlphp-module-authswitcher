@@ -156,14 +156,14 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     }
 
     /**
-     * Check if the MFA auth proc filters (which were run) finished successfully. If everything is configured correctly,
-     * this should not throw an exception.
+     * Check whether MFA was performed, either locally (by running MFA auth proc filters) or at the upstream IdP.
      *
-     * @param mixed $state
+     * @param mixed      $state
+     * @param mixed|null $upstreamContext
      */
-    private static function wasMFAPerformed($state)
+    private static function wasMFAPerformed($state, $upstreamContext = null)
     {
-        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]);
+        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || AuthSwitcher::MFA === $upstreamContext;
     }
 
     /**
