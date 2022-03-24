@@ -152,6 +152,8 @@ already. You just need to set the `proxy_mode` configuration option to `true`:
 
 If a user should only use MFA, set `mfaEnforced` user attribute to a non-empty value. You can fill this attribute any way you like, for example from LDAP or from database.
 
+If the user has no MFA tokens and `mfaEnforced` is non-empty, it is ignored (to prevent lock-outs).
+
 When the attribute is not empty, single factor authentication is not considered. Therefore, when an SP requests `SFA` or `PasswordProtectedTransport` specifically, the authentication will fail.
 
 ## Add additional attributes when MFA is performed

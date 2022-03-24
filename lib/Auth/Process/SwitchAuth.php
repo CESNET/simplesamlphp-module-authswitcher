@@ -214,7 +214,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
             }
         }
-        if (empty($state['Attributes']['mfaEnforced'])) {
+        if (empty($state['Attributes']['mfaEnforced']) || empty($result)) {
             $result[] = AuthSwitcher::SFA;
         }
 
