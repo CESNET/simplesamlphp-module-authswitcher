@@ -1,3 +1,15 @@
+# [10.0.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.2.0...v10.0.0) (2022-03-24)
+
+
+### Bug Fixes
+
+* ignore mfaEnforced when user has no MFA tokens ([c08bebe](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/c08bebe893e40a4ea583811f05148d4521868710))
+
+
+### BREAKING CHANGES
+
+* mfaEnforced is ignored for users without MFA tokens
+
 # [9.2.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.1.0...v9.2.0) (2022-02-10)
 
 
