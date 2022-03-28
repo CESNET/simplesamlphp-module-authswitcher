@@ -32,9 +32,14 @@ class AuthSwitcher
     public const MFA = 'https://refeds.org/profile/mfa';
 
     /**
+     * Microsoft authentication context for MFA.
+     */
+    public const MS_MFA = 'http://schemas.microsoft.com/claims/multipleauthn';
+
+    /**
      * Supported AuthnContexts (pass <= sfa < mfa).
      */
-    public const SUPPORTED = [Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::SFA, self::MFA];
+    public const SUPPORTED = [Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::SFA, self::MFA, self::MS_MFA];
 
     /**
      * Contexts to assume when request contains none.
@@ -44,12 +49,17 @@ class AuthSwitcher
     /**
      * Contexts to reply when MFA was performed, in the order of preference.
      */
-    public const REPLY_CONTEXTS_MFA = [self::MFA];
+    public const REPLY_CONTEXTS_MFA = [self::MFA, self::MS_MFA];
 
     /**
      * Contexts to reply when MFA was not performed, in the order of preference.
      */
     public const REPLY_CONTEXTS_SFA = [self::SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT];
+
+    /**
+     * Contexts which are considered multifactor authentication.
+     */
+    public const MFA_CONTEXTS = self::REPLY_CONTEXTS_MFA;
 
     /**
      * Contexts which are considered single factor authentication only.
