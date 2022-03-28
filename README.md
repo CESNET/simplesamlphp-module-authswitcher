@@ -61,6 +61,8 @@ Add an instance of the auth proc filter with example configuration `authswitcher
           ],
           'token_type_attr' => 'type',
           'preferred_filter' => 'privacyidea:PrivacyideaAuthProc',
+          'max_user_capability_attr' => 'maxUserCapability',
+          'max_auth' => 'https://id.muni.cz/profile/maxAuth',
       ],
       'configs' => [
             'totp:Totp' => [

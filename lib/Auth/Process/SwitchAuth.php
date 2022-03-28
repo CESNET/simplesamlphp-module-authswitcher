@@ -48,6 +48,13 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private $preferred_filter;
 
+    private $max_user_capability_attr = 'maxUserCapability';
+
+    /**
+     * Maximum Authentication assurance.
+     */
+    private $max_auth = 'https://id.muni.cz/profile/maxAuth';
+
     /**
      * @override
      *
@@ -70,6 +77,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             'mfa_preferred_privacyidea_fail',
             $this->mfa_preferred_privacyidea_fail
         );
+        $this->max_user_capability_attr = $config->getString(
+            'max_user_capability_attr',
+            $this->max_user_capability_attr
+        );
+        $this->max_auth = $config->getString('max_auth', $this->max_auth);
     }
 
     /**
@@ -117,20 +129,34 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 && !AuthnContextHelper::MFAin([$upstreamContext])
         ); // switch to MFA if preferred and not already done if we handle the proxy mode
 
+        $maxUserCapability = '';
+        if (in_array(AuthSwitcher::MFA, $usersCapabilities, true)) {
+            $maxUserCapability = AuthSwitcher::MFA;
+        } elseif (1 === count($usersCapabilities)) {
+            $maxUserCapability = $usersCapabilities[0];
+        }
+        $state['Attributes'][$this->max_user_capability_attr] = [];
+
         if ($performMFA) {
             // MFA
-            $this->performMFA($state);
+            $this->performMFA($state, $maxUserCapability);
         } elseif (empty($upstreamContext)) {
             // SFA
-            self::setAuthnContext($state);
+            $this->setAuthnContext($state, $maxUserCapability);
         }
     }
 
-    public static function setAuthnContext(&$state)
+    public function setAuthnContext(&$state, $maxUserCapability)
     {
-        $possibleReplies = Utils::wasMFAPerformed(
-            $state
-        ) ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
+        $mfaPerformed = Utils::wasMFAPerformed($state);
+
+        if (AuthSwitcher::SFA === $maxUserCapability) {
+            $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
+        } elseif (AuthSwitcher::MFA === $maxUserCapability && $mfaPerformed) {
+            $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
+        }
+
+        $possibleReplies = $mfaPerformed ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
         $possibleReplies = array_values(
             array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
         );
@@ -262,8 +288,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      * Perform the appropriate MFA.
      *
      * @param mixed $state
+     * @param $maxUserCapability
      */
-    private function performMFA(&$state)
+    private function performMFA(&$state, $maxUserCapability)
     {
         $filter = $this->getActiveMethod($state);
 
@@ -280,7 +307,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if (!isset($state[AuthSwitcher::MFA_BEING_PERFORMED])) {
             $state[AuthSwitcher::MFA_BEING_PERFORMED] = true;
         }
-        self::setAuthnContext($state);
+        $this->setAuthnContext($state, $maxUserCapability);
         $state['Attributes']['Config'] = json_encode($this->configs);
         if (null === $this->reserved) {
             $this->reserved = '';
