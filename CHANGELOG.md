@@ -1,3 +1,10 @@
+# [10.1.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.0.0...v10.1.0) (2022-03-29)
+
+
+### Features
+
+* support Microsoft MFA ([c6f5e92](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/c6f5e9250d2fca08acb3d8ddc22b5d33b3497004))
+
 # [10.0.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v9.2.0...v10.0.0) (2022-03-24)
 
 
