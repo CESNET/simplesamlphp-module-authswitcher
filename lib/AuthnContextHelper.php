@@ -16,12 +16,16 @@ class AuthnContextHelper
 {
     public static function MFAin($contexts)
     {
-        return in_array(AuthSwitcher::MFA, $contexts, true);
+        return array_intersect(AuthSwitcher::MFA_CONTEXTS, $contexts);
     }
 
     public static function isMFAprefered($supportedRequestedContexts = [])
     {
-        return count($supportedRequestedContexts) > 0 && AuthSwitcher::MFA === $supportedRequestedContexts[0];
+        return count($supportedRequestedContexts) > 0 && in_array(
+            $supportedRequestedContexts[0],
+            AuthSwitcher::MFA_CONTEXTS,
+            true
+        );
     }
 
     public static function getSupportedRequestedContexts($usersCapabilities, $state, $upstreamContext)
