@@ -1,3 +1,10 @@
+# [10.2.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.1.0...v10.2.0) (2022-03-30)
+
+
+### Features
+
+* switchAuth filter now sets maxUserCapability attribute ([77d51f5](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/77d51f5d4531cbb0f17dc97647def3bc5525e90f))
+
 # [10.1.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.0.0...v10.1.0) (2022-03-29)
 
 
