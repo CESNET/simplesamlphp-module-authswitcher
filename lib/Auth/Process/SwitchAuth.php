@@ -56,6 +56,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private $max_auth = 'https://id.muni.cz/profile/maxAuth';
 
     /**
+     * Whether MFA is enforced for the current user.
+     */
+    private $mfa_enforced;
+
+    /**
      * @override
      *
      * @param mixed $config
@@ -82,6 +87,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->max_user_capability_attr
         );
         $this->max_auth = $config->getString('max_auth', $this->max_auth);
+        $this->mfa_enforced = !empty($state['Attributes']['mfaEnforced']);
     }
 
     /**
@@ -109,7 +115,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS] = AuthnContextHelper::getSupportedRequestedContexts(
             $usersCapabilities,
             $state,
-            $upstreamContext
+            $upstreamContext,
+            $this->mfa_enforced
         );
 
         self::info('supported requested contexts: ' . json_encode($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]));
@@ -123,7 +130,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             throw new Exception(self::DEBUG_PREFIX . 'MFA is preferred but connection to privacyidea failed.');
         }
 
-        $performMFA = !AuthnContextHelper::SFAin($usersCapabilities) || (
+        $performMFA = ($this->mfa_enforced && AuthnContextHelper::MFAin($usersCapabilities)) || (
             AuthnContextHelper::MFAin($usersCapabilities)
                 && AuthnContextHelper::isMFAprefered($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
                 && !AuthnContextHelper::MFAin([$upstreamContext])
@@ -150,13 +157,14 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     {
         $mfaPerformed = Utils::wasMFAPerformed($state);
 
-        if (AuthSwitcher::SFA === $maxUserCapability) {
-            $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
-        } elseif (AuthSwitcher::MFA === $maxUserCapability && $mfaPerformed) {
+        if (AuthSwitcher::SFA === $maxUserCapability || (AuthSwitcher::MFA === $maxUserCapability && $mfaPerformed)) {
             $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
         }
 
-        $possibleReplies = $mfaPerformed ? AuthSwitcher::REPLY_CONTEXTS_MFA : AuthSwitcher::REPLY_CONTEXTS_SFA;
+        $possibleReplies = $mfaPerformed ? array_merge(
+            AuthSwitcher::REPLY_CONTEXTS_MFA,
+            AuthSwitcher::REPLY_CONTEXTS_SFA
+        ) : AuthSwitcher::REPLY_CONTEXTS_SFA;
         $possibleReplies = array_values(
             array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
         );
@@ -240,9 +248,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
             }
         }
-        if (empty($state['Attributes']['mfaEnforced']) || empty($result)) {
-            $result[] = AuthSwitcher::SFA;
-        }
+        $result[] = AuthSwitcher::SFA;
 
         return $result;
     }
