@@ -169,6 +169,8 @@ If the user has no MFA tokens and `mfaEnforced` is non-empty, it is ignored (to 
 
 When the attribute is not empty, multi-factor authentication is always performed. Because it is assumed that the first factor is always password based, when a SP requests `https://refeds.org/profile/sfa` or `PasswordProtectedTransport` specifically, MFA is performed but one of the requested authentication contexts is returned.
 
+When used with proxy mode, MFA is not forced if it was already done at upstream IdP.
+
 ## Add additional attributes when MFA is performed
 
 To add attributes only if MFA was performed, you can use a filter called `AddAdditionalAttributesAfterMfa`.

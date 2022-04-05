@@ -130,11 +130,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             throw new Exception(self::DEBUG_PREFIX . 'MFA is preferred but connection to privacyidea failed.');
         }
 
-        $performMFA = ($this->mfa_enforced && AuthnContextHelper::MFAin($usersCapabilities)) || (
-            AuthnContextHelper::MFAin($usersCapabilities)
-                && AuthnContextHelper::isMFAprefered($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
-                && !AuthnContextHelper::MFAin([$upstreamContext])
-        ); // switch to MFA if preferred and not already done if we handle the proxy mode
+        // switch to MFA if enforced or preferred but not already done if we handle the proxy mode
+        $performMFA = AuthnContextHelper::MFAin($usersCapabilities) && !AuthnContextHelper::MFAin([
+            $upstreamContext,
+        ]) && ($this->mfa_enforced || AuthnContextHelper::isMFAprefered(
+            $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]
+        ));
 
         $maxUserCapability = '';
         if (in_array(AuthSwitcher::MFA, $usersCapabilities, true)) {
