@@ -1,3 +1,11 @@
+## [10.2.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.0...v10.2.1) (2022-04-07)
+
+
+### Bug Fixes
+
+* allow enforced MFA even when only password is requested ([0409553](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/0409553188aff05ee8bdcc3afb0a463e4e994a1d))
+* do not enforce MFA if already done in proxy mode ([a8c5ad9](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/a8c5ad9e133b356bc736e4d74b60b8cbbf109779))
+
 # [10.2.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.1.0...v10.2.0) (2022-03-30)
 
 
