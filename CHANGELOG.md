@@ -1,3 +1,10 @@
+## [10.2.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.1...v10.2.2) (2022-04-07)
+
+
+### Bug Fixes
+
+* read mfaEnforced correctly ([dc5f46a](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/dc5f46a6a8187ee3ab4af2c6a6f06c7d8f9d9dd2))
+
 ## [10.2.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.0...v10.2.1) (2022-04-07)
 
 
