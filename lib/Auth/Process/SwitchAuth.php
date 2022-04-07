@@ -87,7 +87,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->max_user_capability_attr
         );
         $this->max_auth = $config->getString('max_auth', $this->max_auth);
-        $this->mfa_enforced = !empty($state['Attributes']['mfaEnforced']);
     }
 
     /**
@@ -97,6 +96,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      */
     public function process(&$state)
     {
+        $this->mfa_enforced = !empty($state['Attributes']['mfaEnforced']);
+
         $this->getConfig($this->config);
 
         $usersCapabilities = $this->getMFAForUid($state);
