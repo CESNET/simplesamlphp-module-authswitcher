@@ -28,8 +28,12 @@ class AuthnContextHelper
         );
     }
 
-    public static function getSupportedRequestedContexts($usersCapabilities, $state, $upstreamContext)
-    {
+    public static function getSupportedRequestedContexts(
+        $usersCapabilities,
+        $state,
+        $upstreamContext,
+        $mfaEnforced = false
+    ) {
         $requestedContexts = $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] ?? null;
         if (empty($requestedContexts)) {
             Logger::info(
@@ -57,7 +61,8 @@ class AuthnContextHelper
                 $usersCapabilities,
                 $supportedRequestedContexts,
                 $state['saml:RequestedAuthnContext']['Comparison'],
-                $upstreamContext
+                $upstreamContext,
+                $mfaEnforced
             )
         ) {
             Logger::info(
@@ -93,12 +98,14 @@ class AuthnContextHelper
      * @param mixed      $supportedRequestedContexts
      * @param mixed      $comparison
      * @param mixed|null $upstreamContext
+     * @param mixed      $mfaEnforced
      */
     private static function testComparison(
         $usersCapabilities,
         $supportedRequestedContexts,
         $comparison,
-        $upstreamContext = null
+        $upstreamContext = null,
+        $mfaEnforced = false
     ) {
         $upstreamMFA = null === $upstreamContext ? false : self::MFAin([$upstreamContext]);
         $upstreamSFA = null === $upstreamContext ? false : self::SFAin([$upstreamContext]);
@@ -121,16 +128,13 @@ class AuthnContextHelper
                 }
                 break;
             case Constants::COMPARISON_MAXIMUM:
-                if (!($userCanSFA || $upstreamSFA) && $requestedSFA) {
+                if ($mfaEnforced && $requestedSFA) {
                     return false;
                 }
                 break;
             case Constants::COMPARISON_EXACT:
             default:
                 if (!($userCanMFA || $upstreamMFA) && !$requestedSFA) {
-                    return false;
-                }
-                if (!($userCanSFA || $upstreamSFA) && !$requestedMFA) {
                     return false;
                 }
                 break;

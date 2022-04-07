@@ -6,6 +6,17 @@ with [PrivacyIDEA](https://github.com/xpavlic/simplesamlphp-module-privacyidea)
 and [TOTP](https://gitlab.ics.muni.cz/perun/proxyaai/simplesamlphp/simplesamlphp-module-totp) [authentication processing filters](https://simplesamlphp.org/docs/stable/simplesamlphp-authproc)
 and honoring + setting `AuthnContextClassRef`, both for IdP and proxy.
 
+It is assumed that the auth source is password based, then secondary authentication (based on a token) is performed via this module.
+The following authentication contexts are supported for password (single factor) authentication:
+
+- `urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport`
+- [REFEDS SFA profile](https://refeds.org/profile/sfa)
+
+The following authentication contexts are supported for multi-factor authentication:
+
+- [REFEDS MFA profile](https://refeds.org/profile/mfa)
+- `http://schemas.microsoft.com/claims/multipleauthn`
+
 ## Install
 
 You have to install this module using Composer together with SimpleSAMLphp so that dependencies are installed as well.
@@ -156,7 +167,9 @@ If a user should only use MFA, set `mfaEnforced` user attribute to a non-empty v
 
 If the user has no MFA tokens and `mfaEnforced` is non-empty, it is ignored (to prevent lock-outs).
 
-When the attribute is not empty, single factor authentication is not considered. Therefore, when an SP requests `SFA` or `PasswordProtectedTransport` specifically, the authentication will fail.
+When the attribute is not empty, multi-factor authentication is always performed. Because it is assumed that the first factor is always password based, when a SP requests `https://refeds.org/profile/sfa` or `PasswordProtectedTransport` specifically, MFA is performed but one of the requested authentication contexts is returned.
+
+When used with proxy mode, MFA is not forced if it was already done at upstream IdP.
 
 ## Add additional attributes when MFA is performed
 
