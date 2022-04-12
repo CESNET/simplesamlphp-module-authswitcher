@@ -22,6 +22,8 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 
     private $privacy_idea_passwd;
 
+    private $privacy_idea_realm;
+
     private $privacy_idea_domain;
 
     private $tokens_type = ['TOTP', 'WebAuthn'];
@@ -42,6 +44,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         $this->tokens_attr = $config->getString('tokens_Attr', $this->tokens_attr);
         $this->privacy_idea_username = $config->getString('privacy_idea_username');
         $this->privacy_idea_passwd = $config->getString('privacy_idea_passwd');
+        $this->privacy_idea_realm = $config->getString('privacy_idea_realm', null);
         $this->privacy_idea_domain = $config->getString('privacy_idea_domain');
         $this->tokens_type = $config->getArray('tokens_type', $this->tokens_type);
         $this->user_attribute = $config->getString('user_attribute', $this->user_attribute);
@@ -98,6 +101,9 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
             'username' => $this->privacy_idea_username,
             'password' => $this->privacy_idea_passwd,
         ];
+        if (null !== $this->privacy_idea_realm) {
+            $data['realm'] = $this->privacy_idea_realm;
+        }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->privacy_idea_domain . '/auth');
