@@ -67,7 +67,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         $state[Authswitcher::PRIVACY_IDEA_FAIL] = false;
         $state['Attributes'][$this->tokens_attr] = [];
         $admin_token = $this->getAdminToken();
-        if (null === $admin_token) {
+        if (empty($admin_token)) {
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
 
             return;
@@ -134,7 +134,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         return $response['result']['value']['token'];
     }
 
-    private function getPrivacyIdeaTokensByType($state, $type, $admin_token)
+    private function getPrivacyIdeaTokensByType(&$state, $type, $admin_token)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
