@@ -46,6 +46,8 @@ Use this filter to read user mfa tokens from PrivacyIDEA server to state attribu
         ],
         'user_attribute' => 'eduPersonPrincipalName',
         'token_type_attr' => 'type',
+        //'connect_timeout' => 10, // optional, connect timeout in seconds
+        //'timeout' => 10, // optional, timeout in seconds
     ],
 ],
 ```
