@@ -1,3 +1,16 @@
+# [10.3.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.2...v10.3.0) (2022-04-14)
+
+
+### Bug Fixes
+
+* correct behavior for mfa_preferred_privacyidea_fail=true ([f52389b](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/f52389be92983e56445b9d4490b25ff03454fc4b))
+
+
+### Features
+
+* realm option for GetMfaTokensPrivacyIDEA ([c49bfd8](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/c49bfd8058cebaf8c9bd1652554d0dc51f65000d))
+* timeout and connect_timeout options ([e59d98a](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/e59d98a426c9106452f4068cd9985dc82669f3b9))
+
 ## [10.2.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.1...v10.2.2) (2022-04-07)
 
 
