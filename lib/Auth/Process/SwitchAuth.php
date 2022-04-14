@@ -122,21 +122,18 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         self::info('supported requested contexts: ' . json_encode($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]));
 
-        if (
-            $this->mfa_preferred_privacyidea_fail && isset($state[AuthSwitcher::PRIVACY_IDEA_FAIL]) &&
-            $state[AuthSwitcher::PRIVACY_IDEA_FAIL] &&
-            AuthnContextHelper::isMFAprefered($state[Authswitcher::SUPPORTED_REQUESTED_CONTEXTS]) &&
-            !AuthnContextHelper::MFAin([$upstreamContext])
-        ) {
-            throw new Exception(self::DEBUG_PREFIX . 'MFA is preferred but connection to privacyidea failed.');
-        }
-
-        // switch to MFA if enforced or preferred but not already done if we handle the proxy mode
-        $performMFA = AuthnContextHelper::MFAin($usersCapabilities) && !AuthnContextHelper::MFAin([
+        $shouldPerformMFA = !AuthnContextHelper::MFAin([
             $upstreamContext,
         ]) && ($this->mfa_enforced || AuthnContextHelper::isMFAprefered(
             $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]
         ));
+
+        if ($this->mfa_preferred_privacyidea_fail && !empty($state[AuthSwitcher::PRIVACY_IDEA_FAIL]) && $shouldPerformMFA) {
+            throw new Exception(self::DEBUG_PREFIX . 'MFA should be performed but connection to privacyidea failed.');
+        }
+
+        // switch to MFA if enforced or preferred but not already done if we handle the proxy mode
+        $performMFA = AuthnContextHelper::MFAin($usersCapabilities) && $shouldPerformMFA;
 
         $maxUserCapability = '';
         if (in_array(AuthSwitcher::MFA, $usersCapabilities, true)) {

@@ -16,11 +16,17 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
     private const AS_PI_AUTH_TOKEN = 'auth_token';
     private const AS_PI_AUTH_TOKEN_ISSUED_AT = 'auth_token_issued_at';
 
+    private $connect_timeout = 0;
+
+    private $timeout;
+
     private $tokens_attr = 'mfaTokens';
 
     private $privacy_idea_username;
 
     private $privacy_idea_passwd;
+
+    private $privacy_idea_realm;
 
     private $privacy_idea_domain;
 
@@ -39,9 +45,12 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         parent::__construct($config, $reserved);
 
         $config = Configuration::loadFromArray($config['config']);
+        $this->connect_timeout = $config->getInteger('connect_timeout', $this->connect_timeout);
+        $this->timeout = $config->getInteger('timeout', $this->timeout);
         $this->tokens_attr = $config->getString('tokens_Attr', $this->tokens_attr);
         $this->privacy_idea_username = $config->getString('privacy_idea_username');
         $this->privacy_idea_passwd = $config->getString('privacy_idea_passwd');
+        $this->privacy_idea_realm = $config->getString('privacy_idea_realm', null);
         $this->privacy_idea_domain = $config->getString('privacy_idea_domain');
         $this->tokens_type = $config->getArray('tokens_type', $this->tokens_type);
         $this->user_attribute = $config->getString('user_attribute', $this->user_attribute);
@@ -58,7 +67,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         $state[Authswitcher::PRIVACY_IDEA_FAIL] = false;
         $state['Attributes'][$this->tokens_attr] = [];
         $admin_token = $this->getAdminToken();
-        if (null === $admin_token) {
+        if (empty($admin_token)) {
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
 
             return;
@@ -98,8 +107,15 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
             'username' => $this->privacy_idea_username,
             'password' => $this->privacy_idea_passwd,
         ];
+        if (null !== $this->privacy_idea_realm) {
+            $data['realm'] = $this->privacy_idea_realm;
+        }
 
         $ch = curl_init();
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        if (null !== $this->timeout) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        }
         curl_setopt($ch, CURLOPT_URL, $this->privacy_idea_domain . '/auth');
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         $paramsJson = json_encode($data);
@@ -118,9 +134,13 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         return $response['result']['value']['token'];
     }
 
-    private function getPrivacyIdeaTokensByType($state, $type, $admin_token)
+    private function getPrivacyIdeaTokensByType(&$state, $type, $admin_token)
     {
         $ch = curl_init();
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        if (null !== $this->timeout) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+        }
         curl_setopt($ch, CURLOPT_URL, $this->privacy_idea_domain . '/token/?user=' .
             $state['Attributes'][$this->user_attribute][0] . '&active=True&type=' . $type);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');

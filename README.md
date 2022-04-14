@@ -38,6 +38,7 @@ Use this filter to read user mfa tokens from PrivacyIDEA server to state attribu
         'tokens_Attr' => 'privacyIDEATokens',
         'privacy_idea_username' => 'admin',
         'privacy_idea_passwd' => 'secret',
+        //'privacy_idea_realm' => 'superadminrealm', // optional
         'privacy_idea_domain' => 'https://mfa.id.muni.cz',
         'tokens_type' => [
             'TOTP',
@@ -45,6 +46,8 @@ Use this filter to read user mfa tokens from PrivacyIDEA server to state attribu
         ],
         'user_attribute' => 'eduPersonPrincipalName',
         'token_type_attr' => 'type',
+        //'connect_timeout' => 10, // optional, connect timeout in seconds
+        //'timeout' => 10, // optional, timeout in seconds
     ],
 ],
 ```
