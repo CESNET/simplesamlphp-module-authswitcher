@@ -199,6 +199,26 @@ Also, you can add a `proxy_mode` option as mentioned above.
 ]
 ```
 
+## Password entropy check
+
+Without check, it is assumed that user password fulfill REFEDS SFA. If the check should be performed, set `check_entropy` to `true`. Also set `sfa_alphabet_attr` and `sfa_len_attr` configuration options, which represent names of attributes in `$state`.
+
+`sfa_alphabet` represents number of characters which can be used in password
+
+`sfa_len` represents length of password
+
+```php
+54 => [
+    'class' => 'authSwitcher:SwitchAuth',
+    'config' => [
+        'check_entropy' => true,
+        'sfa_alphabet_attr' => 'sfa_alphabet',
+        'sfa_len_attr' => 'sfa_len'
+        //...
+    ]
+]
+```
+
 # Copyright
 
 © 2017-2022 Pavel Břoušek, Institute of Computer Science, Masaryk University and CESNET, z. s. p. o. All rights reserved.

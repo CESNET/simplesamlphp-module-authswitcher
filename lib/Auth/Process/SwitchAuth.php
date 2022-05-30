@@ -60,6 +60,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      */
     private $mfa_enforced;
 
+    private $check_entropy = false;
+
+    private $sfa_alphabet_attr;
+
+    private $sfa_len_attr;
+
     /**
      * @override
      *
@@ -87,6 +93,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->max_user_capability_attr
         );
         $this->max_auth = $config->getString('max_auth', $this->max_auth);
+        $this->sfa_alphabet_attr = $config->getString('sfa_alphabet_attr', $this->sfa_alphabet_attr);
+        $this->sfa_len_attr = $config->getString('sfa_len_attr', $this->sfa_len_attr);
+        $this->check_entropy = $config->getBoolean('check_entropy', $this->check_entropy);
     }
 
     /**
@@ -117,6 +126,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $usersCapabilities,
             $state,
             $upstreamContext,
+            !$this->check_entropy || $this->checkSfaEntropy($state['Attributes']),
             $this->mfa_enforced
         );
 
@@ -172,6 +182,26 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         } else {
             $state['saml:AuthnContextClassRef'] = $possibleReplies[0];
         }
+    }
+
+    private function checkSfaEntropy($attributes)
+    {
+        if (!$this->sfa_len_attr || !$this->sfa_alphabet_attr || !in_array(
+            $this->sfa_alphabet_attr,
+            $attributes,
+            true
+        ) || !in_array($this->sfa_len_attr, $attributes, true)) {
+            return false;
+        }
+
+        if ($attributes[$this->sfa_alphabet_attr] >= 52 && $attributes[$this->sfa_len_attr] >= 12) {
+            return true;
+        }
+        if ($attributes[$this->sfa_alphabet_attr] >= 72 && $attributes[$this->sfa_len_attr] >= 8) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

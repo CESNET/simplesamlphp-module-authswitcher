@@ -44,7 +44,7 @@ class AuthSwitcher
     /**
      * Contexts to assume when request contains none.
      */
-    public const DEFAULT_REQUESTED_CONTEXTS = [self::SFA, self::MFA];
+    public const DEFAULT_REQUESTED_CONTEXTS = [self::SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::MFA];
 
     /**
      * Contexts to reply when MFA was performed, in the order of preference.
