@@ -136,7 +136,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $performMFA = AuthnContextHelper::MFAin($usersCapabilities) && $shouldPerformMFA;
 
         $maxUserCapability = '';
-        if (in_array(AuthSwitcher::MFA, $usersCapabilities, true)) {
+        if (in_array(AuthSwitcher::MFA, $usersCapabilities, true) || AuthnContextHelper::MFAin([$upstreamContext])) {
             $maxUserCapability = AuthSwitcher::MFA;
         } elseif (1 === count($usersCapabilities)) {
             $maxUserCapability = $usersCapabilities[0];
@@ -144,17 +144,16 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $state['Attributes'][$this->max_user_capability_attr] = [];
 
         if ($performMFA) {
-            // MFA
             $this->performMFA($state, $maxUserCapability);
-        } elseif (empty($upstreamContext)) {
-            // SFA
-            $this->setAuthnContext($state, $maxUserCapability);
+        } else {
+            // SFA or MFA was done at upstream IdP
+            $this->setAuthnContext($state, $maxUserCapability, $upstreamContext);
         }
     }
 
-    public function setAuthnContext(&$state, $maxUserCapability)
+    public function setAuthnContext(&$state, $maxUserCapability, $upstreamContext = null)
     {
-        $mfaPerformed = Utils::wasMFAPerformed($state);
+        $mfaPerformed = Utils::wasMFAPerformed($state, $upstreamContext);
 
         if (AuthSwitcher::SFA === $maxUserCapability || (AuthSwitcher::MFA === $maxUserCapability && $mfaPerformed)) {
             $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
