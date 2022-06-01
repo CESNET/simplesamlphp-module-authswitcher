@@ -1,3 +1,10 @@
+# [10.4.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.3.0...v10.4.0) (2022-06-01)
+
+
+### Features
+
+* set AuthnContext in proxy mode, MFA from upstream for maxUserCapability ([b8b574b](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/b8b574bc7483f0c048b41e4088f10b73511e0a19))
+
 # [10.3.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.2.2...v10.3.0) (2022-04-14)
 
 
