@@ -1,3 +1,10 @@
+# [10.5.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.4.0...v10.5.0) (2022-06-02)
+
+
+### Features
+
+* entropy of user password is now checked by attributes passed from authsource ([06028eb](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/06028ebae52df57401554d62e07b6535cca94bfa))
+
 # [10.4.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.3.0...v10.4.0) (2022-06-01)
 
 
