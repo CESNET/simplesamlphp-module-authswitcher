@@ -32,6 +32,7 @@ class AuthnContextHelper
         $usersCapabilities,
         $state,
         $upstreamContext,
+        $sfaEntropy,
         $mfaEnforced = false
     ) {
         $requestedContexts = $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] ?? null;
@@ -41,10 +42,15 @@ class AuthnContextHelper
                     AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS
                 )
             );
-
-            return AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
+            $requestedContexts = AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
         }
         $supportedRequestedContexts = array_values(array_intersect($requestedContexts, AuthSwitcher::SUPPORTED));
+        if (!$sfaEntropy) {
+            $supportedRequestedContexts = array_diff($supportedRequestedContexts, [Authswitcher::SFA]);
+            Logger::info(
+                'authswitcher: SFA password entropy level isn\'t satisfied. Remove SFA from SupportedRequestedContext.'
+            );
+        }
 
         if (
             !empty($requestedContexts) // sp has requested something
