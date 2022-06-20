@@ -32,7 +32,7 @@
     "simplesamlphp/saml2": "^4.1"
   },
   "require-dev": {
-    "symplify/easy-coding-standard": "^10.0"
+    "symplify/easy-coding-standard": "^11.0"
   },
   "suggest": {
     "privacyidea/simplesamlphp-module-privacyidea": "privacyIDEA 2FA",
