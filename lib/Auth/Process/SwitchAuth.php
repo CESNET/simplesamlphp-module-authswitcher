@@ -148,7 +148,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $maxUserCapability = '';
         if (in_array(AuthSwitcher::MFA, $usersCapabilities, true) || AuthnContextHelper::MFAin([$upstreamContext])) {
             $maxUserCapability = AuthSwitcher::MFA;
-        } elseif (1 === count($usersCapabilities)) {
+        } elseif (count($usersCapabilities) === 1) {
             $maxUserCapability = $usersCapabilities[0];
         }
         $state['Attributes'][$this->max_user_capability_attr] = [];
@@ -165,7 +165,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     {
         $mfaPerformed = Utils::wasMFAPerformed($state, $upstreamContext);
 
-        if (AuthSwitcher::SFA === $maxUserCapability || (AuthSwitcher::MFA === $maxUserCapability && $mfaPerformed)) {
+        if ($maxUserCapability === AuthSwitcher::SFA || ($maxUserCapability === AuthSwitcher::MFA && $mfaPerformed)) {
             $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
         }
 
@@ -247,7 +247,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         }
         $filterModules = array_keys($config['configs']);
         $invalidModules = Utils::areFilterModulesEnabled($filterModules);
-        if (true !== $invalidModules) {
+        if ($invalidModules !== true) {
             $this->warning(
                 'Some modules (' . implode(',', $invalidModules) . ')'
                 . ' in the configuration are missing or disabled.'
@@ -266,7 +266,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
 
                 foreach ($this->type_filter_array as $type => $method) {
-                    if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
+                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = AuthSwitcher::MFA;
                         break;
                     }
@@ -291,7 +291,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
 
                 foreach ($this->type_filter_array as $type => $filter) {
-                    if (false === $mfaToken['revoked'] && $mfaToken[$this->token_type_attr] === $type) {
+                    if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
                         $result[] = $filter;
                     }
                 }
@@ -300,11 +300,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $result = array_values(array_unique($result));
         $detect = new MobileDetect();
         $mobile_pref = $detect->isMobile();
-        if ([] === $result) {
+        if ($result === []) {
             return null;
         }
         $state['Attributes']['MFA_FILTERS'] = $result;
-        if (null !== $this->preferred_filter && in_array($this->preferred_filter, $result, true)) {
+        if ($this->preferred_filter !== null && in_array($this->preferred_filter, $result, true)) {
             return $this->preferred_filter;
         }
         if ($mobile_pref) {
@@ -343,7 +343,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         }
         $this->setAuthnContext($state, $maxUserCapability);
         $state['Attributes']['Config'] = json_encode($this->configs);
-        if (null === $this->reserved) {
+        if ($this->reserved === null) {
             $this->reserved = '';
         }
         $state['Attributes']['Reserved'] = $this->reserved;

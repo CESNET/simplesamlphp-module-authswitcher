@@ -12,8 +12,11 @@ use SimpleSAML\Store;
 class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 {
     private const DEBUG_PREFIX = 'authswitcher:GetMfaTokensPrivacyIDEA: ';
+
     private const AS_PI = 'as_pi';
+
     private const AS_PI_AUTH_TOKEN = 'auth_token';
+
     private const AS_PI_AUTH_TOKEN_ISSUED_AT = 'auth_token_issued_at';
 
     private $connect_timeout = 0;
@@ -107,13 +110,13 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
             'username' => $this->privacy_idea_username,
             'password' => $this->privacy_idea_passwd,
         ];
-        if (null !== $this->privacy_idea_realm) {
+        if ($this->privacy_idea_realm !== null) {
             $data['realm'] = $this->privacy_idea_realm;
         }
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-        if (null !== $this->timeout) {
+        if ($this->timeout !== null) {
             curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         }
         curl_setopt($ch, CURLOPT_URL, $this->privacy_idea_domain . '/auth');
@@ -123,7 +126,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-        if (200 !== curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
+        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
             Logger::warning(sprintf(self::DEBUG_PREFIX . 'getAuthToken Response from PrivacyIDEA API: %s', $response));
 
             return null;
@@ -138,7 +141,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-        if (null !== $this->timeout) {
+        if ($this->timeout !== null) {
             curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         }
         curl_setopt($ch, CURLOPT_URL, $this->privacy_idea_domain . '/token/?user=' .
@@ -147,7 +150,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization:' . $admin_token]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
-        if (200 !== curl_getinfo($ch, CURLINFO_HTTP_CODE)) {
+        if (curl_getinfo($ch, CURLINFO_HTTP_CODE) !== 200) {
             Logger::warning(sprintf(self::DEBUG_PREFIX .
                 'getPrivacyIdeaTokens type: %s Response from PrivacyIDEA API: %s', $type, $response));
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;

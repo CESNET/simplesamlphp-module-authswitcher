@@ -37,7 +37,7 @@ class Utils
      */
     public static function wasMFAPerformed($state, $upstreamContext = null)
     {
-        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || AuthSwitcher::MFA === $upstreamContext;
+        return !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || $upstreamContext === AuthSwitcher::MFA;
     }
 
     public static function areFilterModulesEnabled(array $filters)

@@ -21,7 +21,7 @@ if (!isset($_REQUEST['StateId'])) {
 $id = $_REQUEST['StateId'];
 
 $sid = State::parseStateID($id);
-if (null !== $sid['url']) {
+if ($sid['url'] !== null) {
     HTTP::checkURLAllowed($sid['url']);
 }
 
@@ -34,7 +34,7 @@ Utils::checkVariableInStateAttributes($state, 'MFA_FILTER_INDEX');
 $config = json_decode($state['Attributes']['Config'], true);
 $mfaResult = $state['Attributes']['MFA_RESULT'];
 $mfaFilterIndex = $state['Attributes']['MFA_FILTER_INDEX'];
-if ('Authenticated' === $state['Attributes']['MFA_RESULT']) {
+if ($state['Attributes']['MFA_RESULT'] === 'Authenticated') {
     ProcessingChain::resumeProcessing($state);
 } else {
     if (count($state['Attributes']['MFA_FILTERS']) - 1 === $mfaFilterIndex) {

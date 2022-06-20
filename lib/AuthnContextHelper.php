@@ -113,8 +113,8 @@ class AuthnContextHelper
         $upstreamContext = null,
         $mfaEnforced = false
     ) {
-        $upstreamMFA = null === $upstreamContext ? false : self::MFAin([$upstreamContext]);
-        $upstreamSFA = null === $upstreamContext ? false : self::SFAin([$upstreamContext]);
+        $upstreamMFA = $upstreamContext === null ? false : self::MFAin([$upstreamContext]);
+        $upstreamSFA = $upstreamContext === null ? false : self::SFAin([$upstreamContext]);
 
         $requestedSFA = self::SFAin($supportedRequestedContexts);
         $requestedMFA = self::MFAin($supportedRequestedContexts);
