@@ -1,3 +1,10 @@
+## [10.5.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.0...v10.5.1) (2022-06-22)
+
+
+### Bug Fixes
+
+* prevent undefined offset warning ([851c636](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/851c636cbfb8795e0a0f9196b3ab48d6061621c3))
+
 # [10.5.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.4.0...v10.5.0) (2022-06-02)
 
 
