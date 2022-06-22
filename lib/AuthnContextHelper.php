@@ -66,7 +66,7 @@ class AuthnContextHelper
             !self::testComparison(
                 $usersCapabilities,
                 $supportedRequestedContexts,
-                $state['saml:RequestedAuthnContext']['Comparison'],
+                $state['saml:RequestedAuthnContext']['Comparison'] ?? Constants::COMPARISON_EXACT,
                 $upstreamContext,
                 $mfaEnforced
             )
