@@ -68,7 +68,6 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
     public function process(&$state)
     {
         $state[Authswitcher::PRIVACY_IDEA_FAIL] = false;
-        $state['Attributes'][$this->tokens_attr] = [];
         $admin_token = $this->getAdminToken();
         if (empty($admin_token)) {
             $state[AuthSwitcher::PRIVACY_IDEA_FAIL] = true;
@@ -165,14 +164,18 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 
     private function saveTokensToStateAttributes(&$state, $tokens)
     {
+        $types = []
         foreach ($tokens as $token) {
             foreach ($this->tokens_type as $type) {
                 if ($token['tokentype'] === strtolower($type)) {
                     $token[$this->token_type_attr] = $type;
-                    $state['Attributes'][$this->tokens_attr][] = $token;
+                    $types[] = $token;
                     break;
                 }
             }
+        }
+        if (!empty($types)) {
+            $state['Attributes'][$this->tokens_attr] = $types;
         }
     }
 }
