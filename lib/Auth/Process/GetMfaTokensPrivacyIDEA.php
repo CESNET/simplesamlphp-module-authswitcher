@@ -164,7 +164,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 
     private function saveTokensToStateAttributes(&$state, $tokens)
     {
-        $types = []
+        $types = [];
         foreach ($tokens as $token) {
             foreach ($this->tokens_type as $type) {
                 if ($token['tokentype'] === strtolower($type)) {
