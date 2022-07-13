@@ -1,3 +1,11 @@
+## [10.5.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.1...v10.5.2) (2022-07-13)
+
+
+### Bug Fixes
+
+* prevent empty mfaTokens ([6a8d76d](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/6a8d76d37b72a7be9136a2005293dee12ad06f9e))
+* typo ([7a85d9b](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/7a85d9bfcde30e5133c6b00dde0405c68cd7e4be))
+
 ## [10.5.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.0...v10.5.1) (2022-06-22)
 
 
