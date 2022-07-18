@@ -71,4 +71,6 @@ class AuthSwitcher
     public const ERROR_STATE_STAGE = 'authSwitcher:errorState';
 
     public const PRIVACY_IDEA_FAIL = 'PrivacyIDEAFail';
+
+    public const SP_REQUESTED_CONTEXTS = 'AUTHSWITCHER_SP_REQUESTED_CONTEXTS';
 }

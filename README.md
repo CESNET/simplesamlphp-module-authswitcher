@@ -151,7 +151,7 @@ filter.
 ## Running in proxy mode
 
 In the proxy mode, it is assumed that the upstream IdP used for authentication could handle the requested `AuthnContext`
-already. You just need to set the `proxy_mode` configuration option to `true`:
+already. You need to set the `proxy_mode` configuration option to `true`:
 
 ```php
 53 => [
@@ -163,6 +163,10 @@ already. You just need to set the `proxy_mode` configuration option to `true`:
     //...
 ]
 ```
+
+You also need to call `DiscoUtils::setUpstreamRequestedAuthnContext($state)` before the user is redirected to upstream IdP, e.g. in the discovery page's code, so that correct AuthnContext is sent to the upstream IdP.
+
+If you only modified the requested AuthnContextClassRef by using the `AuthnContextClassRef` option in `config/authsources.php`, the login at upstream IdP will work, but authswitcher won't be able to process the originally requested AuthnContextClassRefs (because they would be overwriten by the config option).
 
 ## Enforce MFA per user
 

@@ -118,6 +118,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if ($this->proxyMode) {
             $upstreamContext = ProxyHelper::fetchContextFromUpstreamIdp($state);
             self::info('upstream context: ' . $upstreamContext);
+            ProxyHelper::recoverSPRequestedContexts($state);
         } else {
             $upstreamContext = null;
         }
