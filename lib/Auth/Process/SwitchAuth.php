@@ -11,6 +11,7 @@ use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthnContextHelper;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
+use SimpleSAML\Module\authswitcher\ContextSettings;
 use SimpleSAML\Module\authswitcher\ProxyHelper;
 use SimpleSAML\Module\authswitcher\Utils;
 
@@ -78,7 +79,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         $this->config = $config;
         $this->reserved = $reserved;
-        $config = Configuration::loadFromArray($config['config']);
+        $config = isset($config['config']) ? Configuration::loadFromArray(
+            $config['config']
+        ) : Configuration::getOptionalConfig('module_authswitcher.php');
         $this->type_filter_array = $config->getArray('type_filter_array', $this->type_filter_array);
         $this->mobile_friendly_filters = $config->getArray('mobile_friendly_filters', $this->mobile_friendly_filters);
         $this->token_type_attr = $config->getString('token_type_attr', $this->token_type_attr);
@@ -97,24 +100,15 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $this->sfa_len_attr = $config->getString('sfa_len_attr', $this->sfa_len_attr);
         $this->check_entropy = $config->getBoolean('check_entropy', $this->check_entropy);
 
-        $this->contexts_regex = $config->getBoolean('contexts_regex', false);
-        $this->password_contexts = $config->getArray('password_contexts', AuthSwitcher::PASSWORD_CONTEXTS);
-        $this->mfa_contexts = $config->getArray('mfa_contexts', AuthSwitcher::MFA_CONTEXTS);
-        if ($this->contexts_regex) {
-            $this->password_contexts_patterns = array_filter(self::is_regex, $this->password_contexts);
-            $this->password_contexts = array_diff($this->password_contexts, $this->password_contexts_patterns);
-            $this->mfa_contexts_patterns = array_filter(self::is_regex, $this->mfa_contexts);
-            $this->mfa_contexts = array_diff($this->mfa_contexts, $this->mfa_contexts_patterns);
-        } else {
-            $this->password_contexts_patterns = [];
-            $this->mfa_contexts_patterns = [];
-        }
+        list($this->password_contexts, $this->mfa_contexts, $password_contexts_patterns, $mfa_contexts_patterns) = ContextSettings::parse_config(
+            $config
+        );
 
         $this->authnContextHelper = new AuthnContextHelper(
             $this->password_contexts,
             $this->mfa_contexts,
-            $this->password_contexts_patterns,
-            $this->mfa_contexts_patterns
+            $password_contexts_patterns,
+            $mfa_contexts_patterns
         );
     }
 
@@ -204,11 +198,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         } else {
             $state['saml:AuthnContextClassRef'] = $possibleReplies[0];
         }
-    }
-
-    private static function is_regex($str)
-    {
-        return strlen($str) > 2 && substr($str, 0, 1) === '/' && substr($str, -1) === '/';
     }
 
     private function checkSfaEntropy($attributes)

@@ -160,8 +160,9 @@ filter.
 
 ## Running in proxy mode
 
-In the proxy mode, it is assumed that the upstream IdP used for authentication could handle the requested `AuthnContext`
-already. You need to set the `proxy_mode` configuration option to `true`:
+In proxy mode, you need to make a couple of changes.
+
+First, set the `proxy_mode` configuration option to `true`:
 
 ```php
 53 => [
@@ -173,6 +174,8 @@ already. You need to set the `proxy_mode` configuration option to `true`:
     //...
 ]
 ```
+
+If you want to modify `password_contexts` or `mfa_contexts`, move the contents of the `config` array into a new file called `config/module_authswitcher.php`. See `config-templates/module_authswitcher.php` for an example. If you do not want to modify these two options, you can keep the config inside the auth proc filter.
 
 You also need to call `DiscoUtils::setUpstreamRequestedAuthnContext($state)` before the user is redirected to upstream IdP, e.g. in the discovery page's code, so that correct AuthnContext is sent to the upstream IdP.
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Module\authswitcher;
 
+use SimpleSAML\Configuration;
 use SimpleSAML\Logger;
 
 /**
@@ -14,7 +15,7 @@ use SimpleSAML\Logger;
  */
 class DiscoUtils
 {
-    private static const DEBUG_PREFIX = 'AuthSwitcher: ';
+    private const DEBUG_PREFIX = 'authswitcher:DiscoUtils: ';
 
     /**
      * Store requested AuthnContextClassRef from SP and modify them before sending to upstream IdP.
@@ -26,6 +27,17 @@ class DiscoUtils
      */
     public static function setUpstreamRequestedAuthnContext(array &$state)
     {
+        $config = Configuration::getOptionalConfig('module_authswitcher.php');
+        list($password_contexts, $mfa_contexts, $password_contexts_patterns, $mfa_contexts_patterns) = ContextSettings::parse_config(
+            $config
+        );
+        $authnContextHelper = new AuthnContextHelper(
+            $password_contexts,
+            $mfa_contexts,
+            $password_contexts_patterns,
+            $mfa_contexts_patterns
+        );
+
         $spRequestedContexts = $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] ?? [];
 
         // store originally requested contexts for correct handling in SwitchAuth
@@ -34,23 +46,15 @@ class DiscoUtils
         $upstreamRequestedContexts = [];
         if (empty($spRequestedContexts)) {
             Logger::debug(self::DEBUG_PREFIX . 'No AuthnContextClassRef requested, not sending any to upstream IdP.');
-        } elseif (!empty(array_diff(AuthSwitcher::REPLY_CONTEXTS_MFA, $spRequestedContexts))) {
+        } elseif ($authnContextHelper->MFAin($spRequestedContexts)) {
             Logger::debug(self::DEBUG_PREFIX . 'SP requested MFA, will prefer MFA at upstream IdP.');
             $upstreamRequestedContexts = array_values(
-                array_unique(array_merge(
-                    AuthSwitcher::REPLY_CONTEXTS_MFA,
-                    $spRequestedContexts,
-                    AuthSwitcher::REPLY_CONTEXTS_SFA
-                ))
+                array_unique(array_merge($mfa_contexts, $spRequestedContexts, $password_contexts))
             );
         } else {
             Logger::debug(self::DEBUG_PREFIX . 'SP did not request MFA, will prefer SFA at upstream IdP.');
             $upstreamRequestedContexts = array_values(
-                array_unique(array_merge(
-                    $spRequestedContexts,
-                    AuthSwitcher::REPLY_CONTEXTS_SFA,
-                    AuthSwitcher::REPLY_CONTEXTS_MFA
-                ))
+                array_unique(array_merge($spRequestedContexts, $password_contexts, $mfa_contexts))
             );
         }
         if (!empty($upstreamRequestedContexts)) {
