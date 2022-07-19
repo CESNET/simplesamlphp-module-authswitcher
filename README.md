@@ -77,6 +77,12 @@ Add an instance of the auth proc filter with example configuration `authswitcher
           'preferred_filter' => 'privacyidea:PrivacyideaAuthProc',
           'max_user_capability_attr' => 'maxUserCapability',
           'max_auth' => 'https://id.muni.cz/profile/maxAuth',
+          //'password_contexts' => array_merge(AuthSwitcher::PASSWORD_CONTEXTS, [
+          //    'my-custom-authn-context-for-password'
+          //]),
+          //'mfa_contexts' => array_merge(AuthSwitcher::MFA_CONTEXTS, [
+          //    'my-custom-authn-context-for-mfa'
+          //]),
       ],
       'configs' => [
             'totp:Totp' => [
@@ -186,7 +192,6 @@ This filter sets attributes based on whether MFA was in fact performed (at upstr
 `AddAdditionalAttributesAfterMfa` needs to run after the `SwitchAuth` filter.
 
 In configuration, you just need to add a `custom_attrs` option which contains a map of additional attributes and their values.
-Also, you can add a `proxy_mode` option as mentioned above.
 
 ```php
 55 => [
