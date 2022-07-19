@@ -97,10 +97,25 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $this->sfa_len_attr = $config->getString('sfa_len_attr', $this->sfa_len_attr);
         $this->check_entropy = $config->getBoolean('check_entropy', $this->check_entropy);
 
+        $this->contexts_regex = $config->getBoolean('contexts_regex', false);
         $this->password_contexts = $config->getArray('password_contexts', AuthSwitcher::PASSWORD_CONTEXTS);
         $this->mfa_contexts = $config->getArray('mfa_contexts', AuthSwitcher::MFA_CONTEXTS);
+        if ($this->contexts_regex) {
+            $this->password_contexts_patterns = array_filter(self::is_regex, $this->password_contexts);
+            $this->password_contexts = array_diff($this->password_contexts, $this->password_contexts_patterns);
+            $this->mfa_contexts_patterns = array_filter(self::is_regex, $this->mfa_contexts);
+            $this->mfa_contexts = array_diff($this->mfa_contexts, $this->mfa_contexts_patterns);
+        } else {
+            $this->password_contexts_patterns = [];
+            $this->mfa_contexts_patterns = [];
+        }
 
-        $this->authnContextHelper = new AuthnContextHelper($this->password_contexts, $this->mfa_contexts);
+        $this->authnContextHelper = new AuthnContextHelper(
+            $this->password_contexts,
+            $this->mfa_contexts,
+            $this->password_contexts_patterns,
+            $this->mfa_contexts_patterns
+        );
     }
 
     /**
@@ -189,6 +204,11 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         } else {
             $state['saml:AuthnContextClassRef'] = $possibleReplies[0];
         }
+    }
+
+    private static function is_regex($str)
+    {
+        return strlen($str) > 2 && substr($str, 0, 1) === '/' && substr($str, -1) === '/';
     }
 
     private function checkSfaEntropy($attributes)

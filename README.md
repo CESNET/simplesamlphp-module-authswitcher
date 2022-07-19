@@ -78,11 +78,13 @@ Add an instance of the auth proc filter with example configuration `authswitcher
           'max_user_capability_attr' => 'maxUserCapability',
           'max_auth' => 'https://id.muni.cz/profile/maxAuth',
           //'password_contexts' => array_merge(AuthSwitcher::PASSWORD_CONTEXTS, [
-          //    'my-custom-authn-context-for-password'
+          //    'my-custom-authn-context-for-password',
+          //    '/^my-regex-.*/',
           //]),
           //'mfa_contexts' => array_merge(AuthSwitcher::MFA_CONTEXTS, [
-          //    'my-custom-authn-context-for-mfa'
+          //    'my-custom-authn-context-for-mfa',
           //]),
+          //'contexts_regex' => true,
       ],
       'configs' => [
             'totp:Totp' => [
@@ -122,6 +124,8 @@ Add an instance of the auth proc filter with example configuration `authswitcher
     '%remove',
 ],
 ```
+
+You can override which AuthnContextClassRefs are treated as password authentication (`password_contexts`) and MFA authentication (`mfa_contexts`). It is recommended to keep the contexts supported by default, e.g. by merging arrays. If you set `contexts_regex` to `true` and a value in one of these options is a regular expression (wrapped in `/`), all contexts matching the expression are matched (but the regular expression is never used as a response).
 
 ## MFA tokens
 

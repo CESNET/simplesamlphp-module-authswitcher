@@ -14,17 +14,23 @@ use SimpleSAML\Module\saml\Error\NoAuthnContext;
  */
 class AuthnContextHelper
 {
-    public function __construct($password_contexts, $mfa_contexts)
-    {
+    public function __construct(
+        $password_contexts,
+        $mfa_contexts,
+        $password_contexts_patterns = [],
+        $mfa_contexts_patterns = []
+    ) {
         $this->password_contexts = $password_contexts;
+        $this->password_contexts_patterns = $password_contexts_patterns;
         $this->mfa_contexts = $mfa_contexts;
+        $this->mfa_contexts_patterns = $mfa_contexts_patterns;
         $this->supported_contexts = array_merge($this->mfa_contexts, $this->password_contexts);
         $this->default_requested_contexts = array_merge($this->password_contexts, $this->mfa_contexts);
     }
 
     public function MFAin($contexts)
     {
-        return !empty(array_intersect($this->mfa_contexts, $contexts));
+        return $this->contextsMatch($contexts, $this->mfa_contexts, $this->mfa_contexts_patterns);
     }
 
     public function isMFAprefered($supportedRequestedContexts = [])
@@ -95,7 +101,27 @@ class AuthnContextHelper
 
     public function SFAin($contexts)
     {
-        return !empty(array_intersect($this->password_contexts, $contexts));
+        return $this->contextsMatch($contexts, $this->password_contexts, $this->password_contexts_patterns);
+    }
+
+    private static function inPatterns($patterns, $contexts)
+    {
+        foreach ($patterns as $pattern) {
+            foreach ($contexts as $context) {
+                if (preg_match($pattern, $context)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function contextsMatch($inputContexts, $matchedContexts, $matchedPatterns)
+    {
+        return !empty(array_intersect($matchedContexts, $inputContexts)) || self::inPatterns(
+            $matchedPatterns,
+            $inputContexts
+        );
     }
 
     /**
