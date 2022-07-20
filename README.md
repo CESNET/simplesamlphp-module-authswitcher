@@ -77,6 +77,14 @@ Add an instance of the auth proc filter with example configuration `authswitcher
           'preferred_filter' => 'privacyidea:PrivacyideaAuthProc',
           'max_user_capability_attr' => 'maxUserCapability',
           'max_auth' => 'https://id.muni.cz/profile/maxAuth',
+          //'password_contexts' => array_merge(AuthSwitcher::PASSWORD_CONTEXTS, [
+          //    'my-custom-authn-context-for-password',
+          //    '/^my-regex-.*/',
+          //]),
+          //'mfa_contexts' => array_merge(AuthSwitcher::MFA_CONTEXTS, [
+          //    'my-custom-authn-context-for-mfa',
+          //]),
+          //'contexts_regex' => true,
       ],
       'configs' => [
             'totp:Totp' => [
@@ -117,6 +125,8 @@ Add an instance of the auth proc filter with example configuration `authswitcher
 ],
 ```
 
+You can override which AuthnContextClassRefs are treated as password authentication (`password_contexts`) and MFA authentication (`mfa_contexts`). It is recommended to keep the contexts supported by default, e.g. by merging arrays. If you set `contexts_regex` to `true` and a value in one of these options is a regular expression (wrapped in `/`), all contexts matching the expression are matched (but the regular expression is never used as a response).
+
 ## MFA tokens
 
 This module expects that there will be a user attribute (`$attributes` aka `$state['Attributes']`) with
@@ -150,8 +160,9 @@ filter.
 
 ## Running in proxy mode
 
-In the proxy mode, it is assumed that the upstream IdP used for authentication could handle the requested `AuthnContext`
-already. You just need to set the `proxy_mode` configuration option to `true`:
+In proxy mode, you need to make a couple of changes.
+
+First, set the `proxy_mode` configuration option to `true`:
 
 ```php
 53 => [
@@ -163,6 +174,14 @@ already. You just need to set the `proxy_mode` configuration option to `true`:
     //...
 ]
 ```
+
+If you want to modify `password_contexts` or `mfa_contexts`, move the contents of the `config` array into a new file called `config/module_authswitcher.php`. See `config-templates/module_authswitcher.php` for an example. If you do not want to modify these two options, you can keep the config inside the auth proc filter.
+
+You also need to call `DiscoUtils::setUpstreamRequestedAuthnContext($state)` before the user is redirected to upstream IdP, e.g. in the discovery page's code, so that correct AuthnContext is sent to the upstream IdP.
+
+If you only modified the requested AuthnContextClassRef by using the `AuthnContextClassRef` option in `config/authsources.php`, the login at upstream IdP will work, but authswitcher won't be able to process the originally requested AuthnContextClassRefs (because they would be overwriten by the config option).
+
+The last but very important requirement is that you need to modify SimpleSAMLphp by including this patch: https://github.com/simplesamlphp/simplesamlphp/pull/833/files which adds support for passing AuthnContextClassRef to upstream IdP and getting the returned one. To enable the patch, add `'proxymode.passAuthnContextClassRef' => true,` to your `config/config.php`.
 
 ## Enforce MFA per user
 
@@ -182,7 +201,6 @@ This filter sets attributes based on whether MFA was in fact performed (at upstr
 `AddAdditionalAttributesAfterMfa` needs to run after the `SwitchAuth` filter.
 
 In configuration, you just need to add a `custom_attrs` option which contains a map of additional attributes and their values.
-Also, you can add a `proxy_mode` option as mentioned above.
 
 ```php
 55 => [

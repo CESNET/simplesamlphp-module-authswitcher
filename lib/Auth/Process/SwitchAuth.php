@@ -11,6 +11,7 @@ use SimpleSAML\Error\Exception;
 use SimpleSAML\Logger;
 use SimpleSAML\Module\authswitcher\AuthnContextHelper;
 use SimpleSAML\Module\authswitcher\AuthSwitcher;
+use SimpleSAML\Module\authswitcher\ContextSettings;
 use SimpleSAML\Module\authswitcher\ProxyHelper;
 use SimpleSAML\Module\authswitcher\Utils;
 
@@ -78,7 +79,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
         $this->config = $config;
         $this->reserved = $reserved;
-        $config = Configuration::loadFromArray($config['config']);
+        $config = isset($config['config']) ? Configuration::loadFromArray(
+            $config['config']
+        ) : Configuration::getOptionalConfig('module_authswitcher.php');
         $this->type_filter_array = $config->getArray('type_filter_array', $this->type_filter_array);
         $this->mobile_friendly_filters = $config->getArray('mobile_friendly_filters', $this->mobile_friendly_filters);
         $this->token_type_attr = $config->getString('token_type_attr', $this->token_type_attr);
@@ -96,6 +99,17 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $this->sfa_alphabet_attr = $config->getString('sfa_alphabet_attr', $this->sfa_alphabet_attr);
         $this->sfa_len_attr = $config->getString('sfa_len_attr', $this->sfa_len_attr);
         $this->check_entropy = $config->getBoolean('check_entropy', $this->check_entropy);
+
+        list($this->password_contexts, $this->mfa_contexts, $password_contexts_patterns, $mfa_contexts_patterns) = ContextSettings::parse_config(
+            $config
+        );
+
+        $this->authnContextHelper = new AuthnContextHelper(
+            $this->password_contexts,
+            $this->mfa_contexts,
+            $password_contexts_patterns,
+            $mfa_contexts_patterns
+        );
     }
 
     /**
@@ -118,11 +132,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         if ($this->proxyMode) {
             $upstreamContext = ProxyHelper::fetchContextFromUpstreamIdp($state);
             self::info('upstream context: ' . $upstreamContext);
+            ProxyHelper::recoverSPRequestedContexts($state);
         } else {
             $upstreamContext = null;
         }
 
-        $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS] = AuthnContextHelper::getSupportedRequestedContexts(
+        $this->supported_requested_contexts = $this->authnContextHelper->getSupportedRequestedContexts(
             $usersCapabilities,
             $state,
             $upstreamContext,
@@ -130,12 +145,12 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $this->mfa_enforced
         );
 
-        self::info('supported requested contexts: ' . json_encode($state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]));
+        self::info('supported requested contexts: ' . json_encode($this->supported_requested_contexts));
 
-        $shouldPerformMFA = !AuthnContextHelper::MFAin([
+        $shouldPerformMFA = !$this->authnContextHelper->MFAin([
             $upstreamContext,
-        ]) && ($this->mfa_enforced || AuthnContextHelper::isMFAprefered(
-            $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS]
+        ]) && ($this->mfa_enforced || $this->authnContextHelper->isMFAprefered(
+            $this->supported_requested_contexts
         ));
 
         if ($this->mfa_preferred_privacyidea_fail && !empty($state[AuthSwitcher::PRIVACY_IDEA_FAIL]) && $shouldPerformMFA) {
@@ -143,11 +158,13 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         }
 
         // switch to MFA if enforced or preferred but not already done if we handle the proxy mode
-        $performMFA = AuthnContextHelper::MFAin($usersCapabilities) && $shouldPerformMFA;
+        $performMFA = $this->authnContextHelper->MFAin($usersCapabilities) && $shouldPerformMFA;
 
         $maxUserCapability = '';
-        if (in_array(AuthSwitcher::MFA, $usersCapabilities, true) || AuthnContextHelper::MFAin([$upstreamContext])) {
-            $maxUserCapability = AuthSwitcher::MFA;
+        if (in_array(AuthSwitcher::REFEDS_MFA, $usersCapabilities, true) || $this->authnContextHelper->MFAin([
+            $upstreamContext,
+        ])) {
+            $maxUserCapability = AuthSwitcher::REFEDS_MFA;
         } elseif (count($usersCapabilities) === 1) {
             $maxUserCapability = $usersCapabilities[0];
         }
@@ -163,19 +180,19 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     public function setAuthnContext(&$state, $maxUserCapability, $upstreamContext = null)
     {
-        $mfaPerformed = Utils::wasMFAPerformed($state, $upstreamContext);
+        $state[AuthSwitcher::MFA_PERFORMED] = !empty($state[AuthSwitcher::MFA_BEING_PERFORMED]) || $this->authnContextHelper->MFAin([
+            $upstreamContext,
+        ]);
 
-        if ($maxUserCapability === AuthSwitcher::SFA || ($maxUserCapability === AuthSwitcher::MFA && $mfaPerformed)) {
+        if ($maxUserCapability === AuthSwitcher::REFEDS_SFA || ($maxUserCapability === AuthSwitcher::REFEDS_MFA && $state[AuthSwitcher::MFA_PERFORMED])) {
             $state['Attributes'][$this->max_user_capability_attr][] = $this->max_auth;
         }
 
-        $possibleReplies = $mfaPerformed ? array_merge(
-            AuthSwitcher::REPLY_CONTEXTS_MFA,
-            AuthSwitcher::REPLY_CONTEXTS_SFA
-        ) : AuthSwitcher::REPLY_CONTEXTS_SFA;
-        $possibleReplies = array_values(
-            array_intersect($possibleReplies, $state[AuthSwitcher::SUPPORTED_REQUESTED_CONTEXTS])
-        );
+        $possibleReplies = $state[AuthSwitcher::MFA_PERFORMED] ? array_merge(
+            $this->mfa_contexts,
+            $this->password_contexts
+        ) : $this->password_contexts;
+        $possibleReplies = array_values(array_intersect($possibleReplies, $this->supported_requested_contexts));
         if (empty($possibleReplies)) {
             AuthnContextHelper::noAuthnContextResponder($state);
         } else {
@@ -267,7 +284,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
                 foreach ($this->type_filter_array as $type => $method) {
                     if ($mfaToken['revoked'] === false && $mfaToken[$this->token_type_attr] === $type) {
-                        $result[] = AuthSwitcher::MFA;
+                        $result[] = AuthSwitcher::REFEDS_MFA;
                         break;
                     }
                 }
@@ -276,7 +293,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
                 }
             }
         }
-        $result[] = AuthSwitcher::SFA;
+        $result[] = AuthSwitcher::REFEDS_SFA;
 
         return $result;
     }

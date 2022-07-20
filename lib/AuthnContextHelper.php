@@ -14,21 +14,35 @@ use SimpleSAML\Module\saml\Error\NoAuthnContext;
  */
 class AuthnContextHelper
 {
-    public static function MFAin($contexts)
-    {
-        return array_intersect(AuthSwitcher::MFA_CONTEXTS, $contexts);
+    public function __construct(
+        $password_contexts,
+        $mfa_contexts,
+        $password_contexts_patterns = [],
+        $mfa_contexts_patterns = []
+    ) {
+        $this->password_contexts = $password_contexts;
+        $this->password_contexts_patterns = $password_contexts_patterns;
+        $this->mfa_contexts = $mfa_contexts;
+        $this->mfa_contexts_patterns = $mfa_contexts_patterns;
+        $this->supported_contexts = array_merge($this->mfa_contexts, $this->password_contexts);
+        $this->default_requested_contexts = array_merge($this->password_contexts, $this->mfa_contexts);
     }
 
-    public static function isMFAprefered($supportedRequestedContexts = [])
+    public function MFAin($contexts)
+    {
+        return $this->contextsMatch($contexts, $this->mfa_contexts, $this->mfa_contexts_patterns);
+    }
+
+    public function isMFAprefered($supportedRequestedContexts = [])
     {
         return count($supportedRequestedContexts) > 0 && in_array(
             $supportedRequestedContexts[0],
-            AuthSwitcher::MFA_CONTEXTS,
+            $this->mfa_contexts,
             true
         );
     }
 
-    public static function getSupportedRequestedContexts(
+    public function getSupportedRequestedContexts(
         $usersCapabilities,
         $state,
         $upstreamContext,
@@ -39,14 +53,14 @@ class AuthnContextHelper
         if (empty($requestedContexts)) {
             Logger::info(
                 'authswitcher: no AuthnContext requested, using default: ' . json_encode(
-                    AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS
+                    $this->default_requested_contexts
                 )
             );
-            $requestedContexts = AuthSwitcher::DEFAULT_REQUESTED_CONTEXTS;
+            $requestedContexts = $this->default_requested_contexts;
         }
-        $supportedRequestedContexts = array_values(array_intersect($requestedContexts, AuthSwitcher::SUPPORTED));
+        $supportedRequestedContexts = array_values(array_intersect($requestedContexts, $this->supported_contexts));
         if (!$sfaEntropy) {
-            $supportedRequestedContexts = array_diff($supportedRequestedContexts, [Authswitcher::SFA]);
+            $supportedRequestedContexts = array_diff($supportedRequestedContexts, [Authswitcher::REFEDS_SFA]);
             Logger::info(
                 'authswitcher: SFA password entropy level isn\'t satisfied. Remove SFA from SupportedRequestedContext.'
             );
@@ -63,7 +77,7 @@ class AuthnContextHelper
 
         // check for unsatisfiable combinations
         if (
-            !self::testComparison(
+            !$this->testComparison(
                 $usersCapabilities,
                 $supportedRequestedContexts,
                 $state['saml:RequestedAuthnContext']['Comparison'] ?? Constants::COMPARISON_EXACT,
@@ -85,15 +99,29 @@ class AuthnContextHelper
         self::noAuthnContext($state, Constants::STATUS_RESPONDER);
     }
 
-    public static function SFAin($contexts)
+    public function SFAin($contexts)
     {
-        foreach (AuthSwitcher::SFA_CONTEXTS as $sfa_context) {
-            if (in_array($sfa_context, $contexts, true)) {
-                return true;
+        return $this->contextsMatch($contexts, $this->password_contexts, $this->password_contexts_patterns);
+    }
+
+    private static function inPatterns($patterns, $contexts)
+    {
+        foreach ($patterns as $pattern) {
+            foreach ($contexts as $context) {
+                if (preg_match($pattern, $context)) {
+                    return true;
+                }
             }
         }
-
         return false;
+    }
+
+    private function contextsMatch($inputContexts, $matchedContexts, $matchedPatterns)
+    {
+        return !empty(array_intersect($matchedContexts, $inputContexts)) || self::inPatterns(
+            $matchedPatterns,
+            $inputContexts
+        );
     }
 
     /**
@@ -106,21 +134,21 @@ class AuthnContextHelper
      * @param mixed|null $upstreamContext
      * @param mixed      $mfaEnforced
      */
-    private static function testComparison(
+    private function testComparison(
         $usersCapabilities,
         $supportedRequestedContexts,
         $comparison,
         $upstreamContext = null,
         $mfaEnforced = false
     ) {
-        $upstreamMFA = $upstreamContext === null ? false : self::MFAin([$upstreamContext]);
-        $upstreamSFA = $upstreamContext === null ? false : self::SFAin([$upstreamContext]);
+        $upstreamMFA = $upstreamContext === null ? false : $this->MFAin([$upstreamContext]);
+        $upstreamSFA = $upstreamContext === null ? false : $this->SFAin([$upstreamContext]);
 
-        $requestedSFA = self::SFAin($supportedRequestedContexts);
-        $requestedMFA = self::MFAin($supportedRequestedContexts);
+        $requestedSFA = $this->SFAin($supportedRequestedContexts);
+        $requestedMFA = $this->MFAin($supportedRequestedContexts);
 
-        $userCanSFA = self::SFAin($usersCapabilities);
-        $userCanMFA = self::MFAin($usersCapabilities);
+        $userCanSFA = $this->SFAin($usersCapabilities);
+        $userCanMFA = $this->MFAin($usersCapabilities);
 
         switch ($comparison) {
             case Constants::COMPARISON_BETTER:

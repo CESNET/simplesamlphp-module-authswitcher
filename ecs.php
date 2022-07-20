@@ -8,7 +8,7 @@ use Symplify\EasyCodingStandard\Config\ECSConfig;
 use Symplify\EasyCodingStandard\ValueObject\Set\SetList;
 
 return static function (ECSConfig $ecsConfig): void {
-    $ecsConfig->paths([__DIR__ . '/ecs.php', __DIR__ . '/lib', __DIR__ . '/www']);
+    $ecsConfig->paths([__DIR__ . '/config-templates', __DIR__ . '/ecs.php', __DIR__ . '/lib', __DIR__ . '/www']);
 
     $ecsConfig->sets([
         SetList::CLEAN_CODE,

@@ -12,24 +12,24 @@ use SAML2\Constants;
 class AuthSwitcher
 {
     /**
-     * Name of the MFA being performed attribute.
+     * Key into state array for MFA being performed.
      */
-    public const MFA_BEING_PERFORMED = 'mfa_being_performed';
+    public const MFA_BEING_PERFORMED = 'authswitcher_mfa_being_performed';
 
     /**
-     * Name of the support requested contexts attribute.
+     * Key into state array for MFA was done.
      */
-    public const SUPPORTED_REQUESTED_CONTEXTS = 'authswitcher_supported_requested_contexts';
+    public const MFA_PERFORMED = 'authswitcher_mfa_performed';
 
     /**
      * REFEDS profile for SFA.
      */
-    public const SFA = 'https://refeds.org/profile/sfa';
+    public const REFEDS_SFA = 'https://refeds.org/profile/sfa';
 
     /**
      * REFEDS profile for MFA.
      */
-    public const MFA = 'https://refeds.org/profile/mfa';
+    public const REFEDS_MFA = 'https://refeds.org/profile/mfa';
 
     /**
      * Microsoft authentication context for MFA.
@@ -37,38 +37,20 @@ class AuthSwitcher
     public const MS_MFA = 'http://schemas.microsoft.com/claims/multipleauthn';
 
     /**
-     * Supported AuthnContexts (pass <= sfa < mfa).
+     * Contexts trusted as multifactor authentication, in the order of preference (for replies).
      */
-    public const SUPPORTED = [Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::SFA, self::MFA, self::MS_MFA];
+    public const MFA_CONTEXTS = [self::REFEDS_MFA, self::MS_MFA];
 
     /**
-     * Contexts to assume when request contains none.
+     * Contexts trusted as password authentication, in the order of preference (for replies).
      */
-    public const DEFAULT_REQUESTED_CONTEXTS = [self::SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT, self::MFA];
-
-    /**
-     * Contexts to reply when MFA was performed, in the order of preference.
-     */
-    public const REPLY_CONTEXTS_MFA = [self::MFA, self::MS_MFA];
-
-    /**
-     * Contexts to reply when MFA was not performed, in the order of preference.
-     */
-    public const REPLY_CONTEXTS_SFA = [self::SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT];
-
-    /**
-     * Contexts which are considered multifactor authentication.
-     */
-    public const MFA_CONTEXTS = self::REPLY_CONTEXTS_MFA;
-
-    /**
-     * Contexts which are considered single factor authentication only.
-     */
-    public const SFA_CONTEXTS = self::REPLY_CONTEXTS_SFA;
+    public const PASSWORD_CONTEXTS = [self::REFEDS_SFA, Constants::AC_PASSWORD_PROTECTED_TRANSPORT];
 
     public const ERROR_STATE_ID = 'authswitcher_error_state_id';
 
     public const ERROR_STATE_STAGE = 'authSwitcher:errorState';
 
     public const PRIVACY_IDEA_FAIL = 'PrivacyIDEAFail';
+
+    public const SP_REQUESTED_CONTEXTS = 'AUTHSWITCHER_SP_REQUESTED_CONTEXTS';
 }
