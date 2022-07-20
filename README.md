@@ -181,6 +181,8 @@ You also need to call `DiscoUtils::setUpstreamRequestedAuthnContext($state)` bef
 
 If you only modified the requested AuthnContextClassRef by using the `AuthnContextClassRef` option in `config/authsources.php`, the login at upstream IdP will work, but authswitcher won't be able to process the originally requested AuthnContextClassRefs (because they would be overwriten by the config option).
 
+The last but very important requirement is that you need to modify SimpleSAMLphp by including this patch: https://github.com/simplesamlphp/simplesamlphp/pull/833/files which adds support for passing AuthnContextClassRef to upstream IdP and getting the returned one. To enable the patch, add `'proxymode.passAuthnContextClassRef' => true,` to your `config/config.php`.
+
 ## Enforce MFA per user
 
 If a user should only use MFA, set `mfaEnforced` user attribute to a non-empty value. You can fill this attribute any way you like, for example from LDAP or from database.
