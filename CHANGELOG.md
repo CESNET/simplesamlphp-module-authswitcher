@@ -1,3 +1,17 @@
+# [10.6.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.2...v10.6.0) (2022-07-20)
+
+
+### Bug Fixes
+
+* use configuration options in DiscoUtils as well ([109f0a4](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/109f0a458ce9942c748ecf24be599f1d4955314d))
+
+
+### Features
+
+* config options password_contexts and mfa_contexts ([1793946](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/17939463f88f31b6a30f3a25c479c984932f54d0))
+* regular expression support for context options ([132162d](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/132162d03f4ceb668acbce196fe4d6ed0f6a5e6d))
+* utility class for proxy, recover originally requested contexts ([89ae155](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/89ae1552bddc88aed0092f0397545ec40dd29476))
+
 ## [10.5.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.1...v10.5.2) (2022-07-13)
 
 
