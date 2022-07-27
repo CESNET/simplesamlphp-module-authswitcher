@@ -20,8 +20,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     /* constants */
     private const DEBUG_PREFIX = 'authswitcher:SwitchAuth: ';
 
-    private const MFA_TOKENS = 'mfaTokens';
-
     private $type_filter_array = [
         'TOTP' => 'privacyidea:PrivacyideaAuthProc',
         'WebAuthn' => 'privacyidea:PrivacyideaAuthProc',
@@ -55,11 +53,6 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      * Maximum Authentication assurance.
      */
     private $max_auth = 'https://id.muni.cz/profile/maxAuth';
-
-    /**
-     * Whether MFA is enforced for the current user.
-     */
-    private $mfa_enforced;
 
     private $check_entropy = false;
 
@@ -119,7 +112,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      */
     public function process(&$state)
     {
-        $this->mfa_enforced = !empty($state['Attributes']['mfaEnforced']);
+        $mfaEnforced = Utils::isMFAEnforced($state);
 
         $this->getConfig($this->config);
 
@@ -142,16 +135,14 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
             $state,
             $upstreamContext,
             !$this->check_entropy || $this->checkSfaEntropy($state['Attributes']),
-            $this->mfa_enforced
+            $mfaEnforced
         );
 
         self::info('supported requested contexts: ' . json_encode($this->supported_requested_contexts));
 
         $shouldPerformMFA = !$this->authnContextHelper->MFAin([
             $upstreamContext,
-        ]) && ($this->mfa_enforced || $this->authnContextHelper->isMFAprefered(
-            $this->supported_requested_contexts
-        ));
+        ]) && ($mfaEnforced || $this->authnContextHelper->isMFAprefered($this->supported_requested_contexts));
 
         if ($this->mfa_preferred_privacyidea_fail && !empty($state[AuthSwitcher::PRIVACY_IDEA_FAIL]) && $shouldPerformMFA) {
             throw new Exception(self::DEBUG_PREFIX . 'MFA should be performed but connection to privacyidea failed.');
@@ -276,8 +267,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private function getMFAForUid($state)
     {
         $result = [];
-        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
-            foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+        if (!empty($state['Attributes'][AuthSwitcher::MFA_TOKENS])) {
+            foreach ($state['Attributes'][AuthSwitcher::MFA_TOKENS] as $mfaToken) {
                 if (is_string($mfaToken)) {
                     $mfaToken = json_decode($mfaToken, true);
                 }
@@ -301,8 +292,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
     private function getActiveMethod(&$state)
     {
         $result = [];
-        if (!empty($state['Attributes'][self::MFA_TOKENS])) {
-            foreach ($state['Attributes'][self::MFA_TOKENS] as $mfaToken) {
+        if (!empty($state['Attributes'][AuthSwitcher::MFA_TOKENS])) {
+            foreach ($state['Attributes'][AuthSwitcher::MFA_TOKENS] as $mfaToken) {
                 if (is_string($mfaToken)) {
                     $mfaToken = json_decode($mfaToken, true);
                 }

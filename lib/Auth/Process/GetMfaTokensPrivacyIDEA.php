@@ -23,7 +23,7 @@ class GetMfaTokensPrivacyIDEA extends \SimpleSAML\Auth\ProcessingFilter
 
     private $timeout;
 
-    private $tokens_attr = 'mfaTokens';
+    private $tokens_attr = AuthSwitcher::MFA_TOKENS;
 
     private $privacy_idea_username;
 

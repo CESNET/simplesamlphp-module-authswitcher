@@ -53,4 +53,14 @@ class AuthSwitcher
     public const PRIVACY_IDEA_FAIL = 'PrivacyIDEAFail';
 
     public const SP_REQUESTED_CONTEXTS = 'AUTHSWITCHER_SP_REQUESTED_CONTEXTS';
+
+    /**
+     * user attribute which contains MFA tokens
+     */
+    public const MFA_TOKENS = 'mfaTokens';
+
+    /**
+     * user attribute which contains boolean whether MFA should be enforced
+     */
+    public const MFA_ENFORCED = 'mfaEnforced';
 }

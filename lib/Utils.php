@@ -51,4 +51,8 @@ class Utils
             throw new Exception('authswitcher:SwitchMfaMethods: ' . $variable . ' missing in state attributes');
         }
     }
+
+    public static isMFAEnforced($state) {
+        return !empty($state['Attributes'][AuthSwitcher::MFA_ENFORCED]);
+    }
 }
