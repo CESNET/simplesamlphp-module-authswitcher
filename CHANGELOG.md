@@ -1,3 +1,10 @@
+# [10.7.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.6.0...v10.7.0) (2022-07-27)
+
+
+### Features
+
+* enforcing MFA per user per service ([354b516](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/354b516a5fcb776716b95db83db5b2118f5ce5b6))
+
 # [10.6.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.5.2...v10.6.0) (2022-07-20)
 
 
