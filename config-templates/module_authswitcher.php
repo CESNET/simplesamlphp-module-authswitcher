@@ -19,4 +19,7 @@ $config = [
     //    'my-custom-authn-context-for-mfa',
     //]),
     //'contexts_regex' => true,
+    //'entityID' => function($request){
+    //    return empty($request["saml:RequesterID"]) ? $request["SPMetadata"]["entityid"] : $request["saml:RequesterID"][0];
+    //},
 ];
