@@ -85,6 +85,9 @@ Add an instance of the auth proc filter with example configuration `authswitcher
           //    'my-custom-authn-context-for-mfa',
           //]),
           //'contexts_regex' => true,
+          //'entityID' => function($request){
+          //    return empty($request["saml:RequesterID"]) ? $request["SPMetadata"]["entityid"] : $request["saml:RequesterID"][0];
+          //},
       ],
       'configs' => [
             'totp:Totp' => [
@@ -192,6 +195,18 @@ If the user has no MFA tokens and `mfaEnforced` is non-empty, it is ignored (to 
 When the attribute is not empty, multi-factor authentication is always performed. Because it is assumed that the first factor is always password based, when a SP requests `https://refeds.org/profile/sfa` or `PasswordProtectedTransport` specifically, MFA is performed but one of the requested authentication contexts is returned.
 
 When used with proxy mode, MFA is not forced if it was already done at upstream IdP.
+
+## Enforce MFA per user per service
+
+If some user should use MFA for some services, set `mfaEnforceSettings` user attribute to one of the following JSON-encoded object types:
+
+- `{"all":true}` to force MFA for all services (equivalent to mfaEnforced)
+- `{"include_categories":["category1","category2"]}` to force MFA for all services from the listed categories
+- `{"include_categories":["category1","category2"],"exclude_rps":["entityID1","entityID2"]}` to force MFA for all services from the listed categories except services with entity ID `entityID1` and `entityID2`
+
+For this to work, you must also fill the `rpCategory` user attribute with the appropriate category. If this attribute is empty, the service is assumed to belong to a category named `"other"`.
+
+By default, entity ID is read from the metadata of the current SP. You can override this by specifying the `entityID` config option to either a string (which is used as is) or a callable in the form `function getEntityID($state){return "str";}`. See example configs for more.
 
 ## Add additional attributes when MFA is performed
 

@@ -60,6 +60,8 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
 
     private $sfa_len_attr;
 
+    private $entityID;
+
     /**
      * @override
      *
@@ -92,6 +94,7 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
         $this->sfa_alphabet_attr = $config->getString('sfa_alphabet_attr', $this->sfa_alphabet_attr);
         $this->sfa_len_attr = $config->getString('sfa_len_attr', $this->sfa_len_attr);
         $this->check_entropy = $config->getBoolean('check_entropy', $this->check_entropy);
+        $this->entityID = $config->getValue('entityID', null);
 
         list($this->password_contexts, $this->mfa_contexts, $password_contexts_patterns, $mfa_contexts_patterns) = ContextSettings::parse_config(
             $config
@@ -112,9 +115,9 @@ class SwitchAuth extends \SimpleSAML\Auth\ProcessingFilter
      */
     public function process(&$state)
     {
-        $mfaEnforced = Utils::isMFAEnforced($state);
-
         $this->getConfig($this->config);
+
+        $mfaEnforced = Utils::isMFAEnforced($state, $this->entityID);
 
         $usersCapabilities = $this->getMFAForUid($state);
 

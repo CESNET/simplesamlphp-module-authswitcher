@@ -63,4 +63,14 @@ class AuthSwitcher
      * user attribute which contains boolean whether MFA should be enforced
      */
     public const MFA_ENFORCED = 'mfaEnforced';
+
+    /**
+     * user attribute which contains settings object for enforcing MFA
+     */
+    public const MFA_ENFORCE_SETTINGS = 'mfaEnforceSettings';
+
+    /**
+     * user attribute which contains RP category for the current service
+     */
+    public const RP_CATEGORY = 'rpCategory';
 }

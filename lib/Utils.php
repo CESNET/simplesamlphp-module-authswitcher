@@ -12,6 +12,8 @@ use SimpleSAML\Module;
  */
 class Utils
 {
+    private const DEBUG_PREFIX = 'authswitcher:Utils: ';
+
     /**
      * Execute an auth proc filter.
      *
@@ -48,11 +50,60 @@ class Utils
     public static function checkVariableInStateAttributes($state, $variable)
     {
         if (!isset($state['Attributes'][$variable])) {
-            throw new Exception('authswitcher:SwitchMfaMethods: ' . $variable . ' missing in state attributes');
+            throw new Exception(self::DEBUG_PREFIX . $variable . ' missing in state attributes');
         }
     }
 
-    public static isMFAEnforced($state) {
-        return !empty($state['Attributes'][AuthSwitcher::MFA_ENFORCED]);
+    public static function isMFAEnforced($state, $entityID = null)
+    {
+        if (!empty($state['Attributes'][AuthSwitcher::MFA_ENFORCE_SETTINGS])) {
+            $settings = $state['Attributes'][AuthSwitcher::MFA_ENFORCE_SETTINGS];
+            if (is_string($settings)) {
+                $settings = json_decode($settings, true, 3, JSON_THROW_ON_ERROR);
+            }
+
+            if (!empty($settings['all'])) {
+                Logger::info(self::DEBUG_PREFIX . 'MFA was forced for all services by settings');
+                return true;
+            }
+
+            $rpCategory = $state['Attributes'][AuthSwitcher::RP_CATEGORY][0] ?? 'other';
+
+            $rpIdentifier = self::getEntityID($entityID, $state);
+
+            if (!empty($settings['include_categories']) && in_array(
+                $rpCategory,
+                $settings['include_categories'],
+                true
+            ) && !in_array($rpIdentifier, $settings['exclude_rps'] ?? [], true)) {
+                Logger::info(self::DEBUG_PREFIX . 'MFA was forced for this service by settings');
+                return true;
+            }
+
+            Logger::info(self::DEBUG_PREFIX . 'MFA was not forced by settings');
+            return false;
+        }
+        if (!empty($state['Attributes'][AuthSwitcher::MFA_ENFORCED])) {
+            Logger::info(self::DEBUG_PREFIX . 'MFA was forced for all services by mfaEnforced');
+            return true;
+        }
+        Logger::info(self::DEBUG_PREFIX . 'MFA was not forced');
+        return false;
+    }
+
+    private static function getEntityID($entityID, $request)
+    {
+        if ($entityID === null) {
+            return $request['SPMetadata']['entityid'];
+        }
+        if (is_callable($entityID)) {
+            return call_user_func($entityID, $request);
+        }
+        if (!is_string($entityID)) {
+            throw new Exception(
+                self::DEBUG_PREFIX . 'Invalid configuration option entityID. It must be a string or a callable.'
+            );
+        }
+        return $entityID;
     }
 }
