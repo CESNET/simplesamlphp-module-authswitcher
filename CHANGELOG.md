@@ -1,3 +1,10 @@
+## [10.7.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.0...v10.7.1) (2022-08-01)
+
+
+### Bug Fixes
+
+* add missing import in Utils ([399f373](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/399f373b69aa4051ce543216a9949785294894e1))
+
 # [10.7.0](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.6.0...v10.7.0) (2022-07-27)
 
 
