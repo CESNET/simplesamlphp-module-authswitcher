@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Module\authswitcher;
 
 use SimpleSAML\Error\Exception;
+use SimpleSAML\Logger;
 use SimpleSAML\Module;
 
 /**
