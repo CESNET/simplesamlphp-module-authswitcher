@@ -1,3 +1,10 @@
+## [10.7.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.1...v10.7.2) (2022-08-04)
+
+
+### Bug Fixes
+
+* change log message about setUpstreamRequestedAuthnContext from error to info ([cdec487](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/cdec4874705ed3ed6608404f39d2d714e4a48622))
+
 ## [10.7.1](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.0...v10.7.1) (2022-08-01)
 
 
