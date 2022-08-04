@@ -33,7 +33,7 @@ class ProxyHelper
         if (isset($state[AuthSwitcher::SP_REQUESTED_CONTEXTS])) {
             $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] = $state[AuthSwitcher::SP_REQUESTED_CONTEXTS];
         } else {
-            Logger::error('authswitcher: running in proxy mode but setUpstreamRequestedAuthnContext was not called.');
+            Logger::info('authswitcher: running in proxy mode but setUpstreamRequestedAuthnContext was not called');
         }
     }
 }
