@@ -46,13 +46,24 @@ class DiscoUtils
         $upstreamRequestedContexts = [];
         if (empty($spRequestedContexts)) {
             Logger::debug(self::DEBUG_PREFIX . 'No AuthnContextClassRef requested, not sending any to upstream IdP.');
-        } elseif ($authnContextHelper->MFAin($spRequestedContexts)) {
-            Logger::debug(self::DEBUG_PREFIX . 'SP requested MFA, will prefer MFA at upstream IdP.');
+        } elseif ($authnContextHelper->MFAin($spRequestedContexts) && !$authnContextHelper->SFAin($spRequestedContexts)) {
+            Logger::debug(self::DEBUG_PREFIX . 'SP requires MFA, will prefer MFA at upstream IdP.');
+            $upstreamRequestedContexts = array_values(
+                array_unique(array_merge($mfa_contexts, $spRequestedContexts, $password_contexts))
+            );
+        } elseif (
+            $authnContextHelper->MFAin($spRequestedContexts)
+            && self::getMinIndex($spRequestedContexts, $mfa_contexts) < self::getMinIndex(
+                $spRequestedContexts,
+                $password_contexts
+            )
+        ) {
+            Logger::debug(self::DEBUG_PREFIX . 'SP prefers MFA, will prefer MFA at upstream IdP.');
             $upstreamRequestedContexts = array_values(
                 array_unique(array_merge($mfa_contexts, $spRequestedContexts, $password_contexts))
             );
         } else {
-            Logger::debug(self::DEBUG_PREFIX . 'SP did not request MFA, will prefer SFA at upstream IdP.');
+            Logger::debug(self::DEBUG_PREFIX . 'SP does not prefer MFA, will prefer SFA at upstream IdP.');
             $upstreamRequestedContexts = array_values(
                 array_unique(array_merge($spRequestedContexts, $password_contexts, $mfa_contexts))
             );
@@ -66,5 +77,13 @@ class DiscoUtils
             );
             $state['saml:RequestedAuthnContext']['AuthnContextClassRef'] = $upstreamRequestedContexts;
         }
+    }
+
+    /**
+     * Returns first index in arr1 of any element from arr2
+     */
+    private static function getMinIndex($arr1, $arr2)
+    {
+        return min(array_keys(array_intersect($arr1, $arr2)));
     }
 }
