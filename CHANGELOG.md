@@ -1,3 +1,10 @@
+## [10.7.3](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.2...v10.7.3) (2022-08-30)
+
+
+### Bug Fixes
+
+* do not prefer MFA at upstream when not preferred at SP ([c1b50da](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/c1b50daa71fcb019cd889548d141b558e07573c9))
+
 ## [10.7.2](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.1...v10.7.2) (2022-08-04)
 
 
