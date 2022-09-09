@@ -59,6 +59,9 @@ class Utils
     {
         if (!empty($state['Attributes'][AuthSwitcher::MFA_ENFORCE_SETTINGS])) {
             $settings = $state['Attributes'][AuthSwitcher::MFA_ENFORCE_SETTINGS];
+            if (isset($settings[0])) {
+                $settings = $settings[0];
+            }
             if (is_string($settings)) {
                 $settings = json_decode($settings, true, 3, JSON_THROW_ON_ERROR);
             }
