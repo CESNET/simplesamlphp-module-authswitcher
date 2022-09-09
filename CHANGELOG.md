@@ -1,3 +1,10 @@
+## [10.7.4](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.3...v10.7.4) (2022-09-09)
+
+
+### Bug Fixes
+
+* handle numeric array in mfaEnforceSettings ([e1355c9](https://github.com/CESNET/simplesamlphp-module-authswitcher/commit/e1355c9bebbb40f5714d8be9b5410e53b1342179))
+
 ## [10.7.3](https://github.com/CESNET/simplesamlphp-module-authswitcher/compare/v10.7.2...v10.7.3) (2022-08-30)
 
 
