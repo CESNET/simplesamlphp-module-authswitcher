@@ -1,5 +1,7 @@
 # SimpleSAMLPHP module authswitcher
 
+**REPOSITORY HAS BEEN MOVED TO: https://gitlab.ics.muni.cz/perun-proxy-aai/simplesamlphp/simplesamlphp-module-authswitcher**
+
 Module for switching between different MFA modules. Tested
 with [PrivacyIDEA](https://github.com/xpavlic/simplesamlphp-module-privacyidea)
 , [WebAuthn](https://github.com/CESNET/simplesamlphp-module-webauthn)
